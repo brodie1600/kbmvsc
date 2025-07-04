@@ -1,3 +1,9 @@
 RewriteEngine On
-RewriteCond %{HTTP_HOST} ^www\.kbmvscontroller\.com$ [NC]
-RewriteRule ^(.*)$ https://kbmvscontroller.com/$1 [L,R=301]
+RewriteCond %{HTTP_HOST} ^www\.staging\.kbmvscontroller\.com$ [NC]
+RewriteRule ^(.*)$ https://staging.kbmvscontroller.com/$1 [L,R=301]
+<FilesMatch "^\.env">
+    Require all denied
+</FilesMatch>
+<IfModule mod_headers.c>
+    Header set X-Robots-Tag "noindex, nofollow"
+</IfModule>

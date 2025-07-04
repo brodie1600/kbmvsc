@@ -1,5 +1,4 @@
-.vscode/
-config/
-scripts/
 sitemap.xml
 robots.txt
+.env
+.env.*
