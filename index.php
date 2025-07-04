@@ -204,7 +204,7 @@ foreach ($rows as $r) {
           <div class="mb-3">
             <div
               class="g-recaptcha"
-              data-sitekey="6Lec8GUrAAAAAEbLpbZWMjE5ImXQpenL9QjW2t3C"
+              data-sitekey="<?= htmlspecialchars(RECAPTCHA_SITE_KEY) ?>"
             ></div>
           </div>
 
