@@ -1,0 +1,3 @@
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\.kbmvscontroller\.com$ [NC]
+RewriteRule ^(.*)$ https://kbmvscontroller.com/$1 [L,R=301]

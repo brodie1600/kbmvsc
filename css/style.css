@@ -1,0 +1,225 @@
+/* Global typography & color */
+body {
+  font-family: "Trebuchet MS", Helvetica, sans-serif;
+  color: #ddd;
+  position: relative;
+  background: #000 url('../images/bg3.svg') repeat fixed top left;
+  margin: 0;
+  padding: 0;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#main, header, #footer, .announce, .games-list, #reset-password {
+  position: relative;
+  z-index: 1;
+}
+
+#login-reg-form {
+  border: 1px solid #aaa;
+}
+
+#reset-password {
+  width: 40%;
+  margin-top: 10rem;
+  background: #111;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  padding: 1rem 1rem;
+}
+
+.navbar {
+  width: 100%;
+  position: fixed;
+  z-index: 2;
+}
+
+.announce {
+  color: #ddd;
+  width: 50%;
+  margin-top: 3rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 3rem;
+  background: #080808;
+  border: 1px solid #777;
+  border-radius: 8px;
+  padding: 1rem 1rem;
+}
+
+.announce h3 {
+  text-align: center;
+}
+
+/* Game block */
+.game-block {
+  width: 75%;
+  margin: 0.5rem auto;
+  background: #111;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: 105px; /* initial height for collapsed state */
+  transition: max-height 0.3s ease;
+}
+
+/* Expand animation */
+.game-block.expanded {
+  max-height: 500px; /* enough to show details */
+}
+
+/* Google sign-in button */
+#g_id_signin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Bottom-left toast container */
+#alert-container {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1055;
+}
+
+/* And remove default margin from the alert so it hugs the corner */
+#alert-container .alert {
+  margin: 0;
+}
+
+#footer {
+  width: 100%;
+  background: #080808;
+  text-align: center;
+  border-top: 1px solid #666;
+  margin-top: 3em;
+  padding: 0.75rem;
+}
+
+#footer p {
+  color: #ccc !important;
+  font-size: x-small;
+}
+
+/* Header row (collapsed) */
+.header-row {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  cursor: pointer;
+}
+.header-row .cover {
+  height: 80px;
+  object-fit: cover;
+  margin-right: 1rem;
+}
+.header-row .title {
+  flex: 1;
+  font-size: 1.25rem;
+  margin: 0;
+}
+.header-row .majority-icon {
+  width: 50px;
+  height: 50px;
+  margin-right: 1rem;
+}
+
+/* Details container: static visibility, part of block height */
+.details {
+  padding: 0 1rem 1rem;
+}
+
+/* Game info lines */
+.game-info p {
+  margin: 0.25rem 0;
+}
+.platform-icons i {
+  margin-right: 0.5rem;
+}
+
+/* Vote row inside details */
+.vote-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.count-label {
+  font-size: 0.85rem;
+  color: #ddd;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+/* Row of [icon][bar][icon] */
+.vote-section {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+/* Let the bar flex to fill the space between icons */
+.vote-section .vote-bar {
+  flex: 1;
+}
+
+/* Vote icons */
+.vote-icon {
+  width: 50px;
+  height: 50px;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.vote-icon.kbm-icon { background-image: url('../icons/kbm-drkong.svg'); }
+.vote-icon.controller-icon { background-image: url('../icons/controller-lgtong.svg'); }
+.vote-icon:hover { filter: brightness(1.2); }
+.vote-icon.active.kbm-icon { filter: drop-shadow(0 0 5px #ba6c06); }
+.vote-icon.active.controller-icon { filter: drop-shadow(0 0 5px #fcba03); }
+
+/* Vote bar */
+.vote-bar {
+  position: relative;
+  flex: 1;
+  height: 12px;
+  background: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+}
+.bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transition: width 0.3s ease;
+}
+
+.kbm-bar {
+  left: 0; background: #ba6c06;
+}
+
+.controller-bar {
+  right: 0; background: #fcba03;
+}
+
+.tick {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 20px;
+  background: #fff;
+  transition: left 0.3s ease;
+}
