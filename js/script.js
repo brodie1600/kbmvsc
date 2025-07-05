@@ -230,43 +230,4 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });    
   });
-    // 4) Search/filter games
-  const searchInput = document.getElementById('gameSearch');
-  const listContainer = document.querySelector('.games-list');
-  if (searchInput && listContainer) {
-    const blocks = Array.from(listContainer.children);
-    searchInput.addEventListener('input', () => {
-      const q = searchInput.value.trim().toLowerCase();
-      if (!q) {
-        // no query: restore original order & show all
-        blocks.forEach(b => {
-          b.style.display = '';
-          listContainer.appendChild(b);
-        });
-        return;
-      }
-
-      // Partition: prefix-matches first, then substring-matches
-      const prefixMatches    = [];
-      const substringMatches = [];
-
-      blocks.forEach(block => {
-        const titleEl = block.querySelector('.title');
-        const title = titleEl ? titleEl.textContent.trim().toLowerCase() : '';
-        block.style.display = 'none';
-
-        if (title.startsWith(q)) {
-          prefixMatches.push(block);
-        } else if (title.includes(q)) {
-          substringMatches.push(block);
-        }
-      });
-
-      // Show & re-append in order
-      [...prefixMatches, ...substringMatches].forEach(b => {
-        b.style.display = '';
-        listContainer.appendChild(b);
-      });
-    });
-  }
 });
