@@ -58,6 +58,15 @@ body::before {
   text-align: center;
 }
 
+#gameSearch {
+  width: 25%;
+  margin: auto;
+}
+
+#gameSearch::placeholder {
+  color:#ddd;
+}
+
 /* Game block */
 .game-block {
   width: 75%;
