@@ -78,7 +78,7 @@ $voteAgg = [];
   </div>
   <div class="games-list"></div>
   <div class="text-center my-3">
-    <button id="loadMoreBtn" class="btn btn-outline-secondary">Load More</button>
+    <button id="loadMoreBtn" class="btn btn-outline-light">Load More</button>
   </div>
   </div>
   <script>
