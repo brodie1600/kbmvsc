@@ -23,29 +23,9 @@ if ($userId) {
     $userVotes = $stmtVotes->fetchAll(PDO::FETCH_KEY_PAIR);
 }
 
-// 3. Fetch all games
-$stmt = $pdo->query("SELECT * FROM games ORDER BY name ASC");
-$games = $stmt->fetchAll();
-
-// 3.5) Preload vote counts for every game
-$stmtAgg = $pdo->query("
-  SELECT 
-    game_id,
-    SUM(vote_type = 'kbm')        AS kbm_count,
-    SUM(vote_type = 'controller') AS controller_count
-  FROM votes
-  GROUP BY game_id
-");
-$rows = $stmtAgg->fetchAll(PDO::FETCH_ASSOC);
-
-// Build a lookup: [ game_id => ['kbm'=>int, 'controller'=>int], … ]
+// Games will be loaded dynamically via AJAX
+$games = [];
 $voteAgg = [];
-foreach ($rows as $r) {
-    $voteAgg[$r['game_id']] = [
-      'kbm'        => (int)$r['kbm_count'],
-      'controller' => (int)$r['controller_count']
-    ];
-}
 
 ?>
 
@@ -96,66 +76,17 @@ foreach ($rows as $r) {
       aria-label="Search titles"
     >
   </div>
-  <div class="games-list">
-    <?php foreach ($games as $game): ?>
-      <?php
-        // Determine majority icon for collapsed state
-        $gid = (int)$game['id'];
-        $yourVote = $userVotes[$gid] ?? null;
-        $counts = $voteAgg[$gid] ?? ['kbm'=>0,'controller'=>0];
-        if ($counts['kbm'] > $counts['controller']) {
-          $majorIcon = 'icons/kbm-drkong.svg';
-        } elseif ($counts['controller'] > $counts['kbm']) {
-          $majorIcon = 'icons/controller-lgtong.svg';
-        } else {
-          $majorIcon = 'icons/question.svg';
-        }
-
-        $headerURL = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$gid}/header.jpg";
-        $capsuleLgURL = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$gid}/capsule_231x87.jpg";
-        $capsuleSmUrl = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$gid}/capsule_184x69.jpg";
-      ?>
-      <div class="game-block collapsed" data-game-id="<?= $gid ?>">
-        <!-- Collapsed header -->
-        <div class="header-row">
-          <img class="cover" loading="lazy" src="<?= htmlspecialchars($capsuleLgURL) ?>" alt="&nbsp;">
-          <h1 class="title"><b><?= htmlspecialchars($game['name']) ?></b></h1>
-          <img class="majority-icon" src="<?= $majorIcon ?>" alt="majority vote">
-        </div>
-        <!-- Expanded details -->
-        <div class="details">
-          <div class="game-info">
-            <p><strong>Developer:</strong> <?= htmlspecialchars($game['developer']) ?></p>
-            <p><strong>Publisher:</strong> <?= htmlspecialchars($game['publisher']) ?></p>
-            <p><strong>Release Date:</strong> <?= htmlspecialchars($game['release_date']) ?></p>
-            <div class="platform-icons">
-              <?php if ($game['supports_windows']): ?><i class="bi bi-microsoft"></i><?php endif; ?>
-              <?php if ($game['supports_mac']): ?><i class="bi bi-apple"></i><?php endif; ?>
-              <?php if ($game['supports_linux']): ?><i class="bi bi-tux"></i><?php endif; ?>
-            </div>
-          </div>
-          <div class="vote-row">
-            <?php $total = $counts['kbm'] + $counts['controller']; ?>
-            <div class="count-label">Votes:<br><span class="count-label-inner"><?= $counts['kbm'] ?> &mdash; <?= $total ?> &mdash; <?= $counts['controller'] ?></span></div>
-            <div class="vote-section">
-              <div class="vote-icon kbm-icon <?= $yourVote === 'kbm' ? 'active' : '' ?>" data-vote-type="kbm"></div>
-              <div class="vote-bar">
-                <div class="bar-fill kbm-bar" style="width:<?= $counts['kbm'] + $counts['controller']?($counts['kbm']/($counts['kbm']+$counts['controller'])*100):50 ?>%"></div>
-                <div class="bar-fill controller-bar" style="width:<?= $counts['kbm'] + $counts['controller']?($counts['controller']/($counts['kbm']+$counts['controller'])*100):50 ?>%"></div>
-                <div class="tick" style="left:<?= $counts['kbm'] + $counts['controller']?($counts['kbm']/($counts['kbm']+$counts['controller'])*100):50 ?>%"></div>
-              </div>
-              <div class="vote-icon controller-icon <?= $yourVote === 'controller' ? 'active' : '' ?>" data-vote-type="controller"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    <?php endforeach; ?>
+  <div class="games-list"></div>
+  <div class="text-center my-3">
+    <button id="loadMoreBtn" class="btn btn-outline-secondary">Load More</button>
+  </div>
   </div>
   <script>
     const isLoggedIn = <?= $userId ? 'true' : 'false' ?>;
     const csrfToken = '<?= $_SESSION['csrf_token'] ?>';
   </script>
   <script src="js/script.js"></script>
+  <script src="js/search.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
 <div class="modal fade" id="authModal" tabindex="-1">
   <div class="modal-dialog">
