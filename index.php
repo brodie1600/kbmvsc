@@ -71,7 +71,7 @@ $voteAgg = [];
     <input
       type="text"
       id="gameSearch"
-      class="form-control"
+      class="form-control bg-dark text-light"
       placeholder="Search titles..."
       aria-label="Search titles"
     >
