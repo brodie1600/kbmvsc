@@ -17,7 +17,7 @@ body::before {
   z-index: 0;
 }
 
-#main, header, #footer, .announce, .games-list, #reset-password {
+#main, header, #footer, .announce, .games-list, #gameSearch, #reset-password {
   position: relative;
   z-index: 1;
 }
