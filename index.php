@@ -43,6 +43,7 @@ $voteAgg = [];
 
 </head>
 <body>
+<div id="main">
 <nav class="navbar navbar-dark bg-dark">
   <div class="container-fluid">
     <a class="navbar-brand">KBM vs Controller</a>
