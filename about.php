@@ -33,7 +33,7 @@ $contactEmail = $_ENV['CONTACT_EMAIL'] ?? getenv('CONTACT_EMAIL') ?? '';
 <br>
 <div class="announce">
   <h3>KBM vs Controller</h3>
-  <p>This lightweight application was designed to provide PC gamers with a quick and easy resource to determine which games are better played with a keyboard and mouse versus a controller. Some of you may do this already when starting a new game. For some titles, the difference is negligible. But for others, it may offer a completely different playing experience! KBM vs Controller is a centralized page that allows users to vote on which method they recommend and view the results of nearly every modern PC game.</p>
+  <p>This lightweight application was designed to provide PC gamers with a quick and easy resource to determine which games are better played with a keyboard and mouse versus a controller. Some of you may do this already when starting a new game. For some titles, the difference is negligible. But for others, it may offer a completely different playing experience! <b>KBM vs Controller</b> is a centralized page that allows users to vote on which method they recommend and view the results of nearly every modern PC game.</p>
   <p>If you think a game should be added to the list, see any incorrect or mismatched information, or encounter any issues while using the site, 
       <a href="#" id="showEmailLink">click this link</a><span id="emailPlaceholder"></span>.</p><br>
   <p>Like what I'm doing?<br>
