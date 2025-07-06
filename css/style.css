@@ -136,6 +136,7 @@ body::before {
   cursor: pointer;
 }
 .header-row .cover {
+  width: 212px;
   height: 80px;
   object-fit: cover;
   margin-right: 1rem;
