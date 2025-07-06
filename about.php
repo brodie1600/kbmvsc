@@ -17,8 +17,12 @@
 </nav>
 <br>
 <div class="announce">
-  <h3>Test content!</h3>
-  <p>Lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+  <h3>KBM vs Controller</h3>
+  <p>This lightweight application was designed to provide PC gamers with a quick and easy resource to determine which games are better played with a keyboard and mouse versus a controller. Some of you may do this already when starting a new game. For some titles, the difference is negligible. But for others, it may offer a completely different playing experience! KBM vs Controller is a centralized page that allows users to vote on which method they recommend and view the results of nearly every modern PC game.</p>
+  <p>If you think a game should be added to the list, see any incorrect or mismatched information, or encounter any issues while using the site, click this link to display a contact email.</p><br>
+  <p>Like what I'm doing?<br>
+  <a href="https://www.buymeacoffee.com/kbmvscontroller" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/arial-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 144px !important;" ></a></p>
+  <p>💚Zach</p>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 </body>
