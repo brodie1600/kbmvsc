@@ -77,6 +77,14 @@ body::before {
   width: 25%;
 }
 
+/* Merge search input and icon borders */
+.navbar .input-group .form-control {
+  border-right: 0;
+}
+.navbar .input-group .input-group-text {
+  border-left: 0;
+}
+
 #gameSearch::placeholder {
   color:#ddd;
 }
