@@ -69,8 +69,12 @@ body::before {
 }
 
 #gameSearch {
+  width: 100%;
+  margin: 0;
+}
+
+.navbar .search-container {
   width: 25%;
-  margin: auto;
 }
 
 #gameSearch::placeholder {
