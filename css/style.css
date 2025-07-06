@@ -77,6 +77,11 @@ body::before {
   width: 25%;
 }
 
+/* Keep search input and icon on one line */
+.navbar .search-container .input-group {
+  flex-wrap: nowrap;
+}
+
 /* Merge search input and icon borders */
 .navbar .input-group .form-control {
   border-right: 0;
