@@ -45,9 +45,21 @@ $voteAgg = [];
 <body>
 <div id="main">
 <nav class="navbar navbar-dark bg-dark">
-  <div class="container-fluid">
+  <div class="container-fluid d-flex align-items-center position-relative">
     <a class="navbar-brand">KBM vs Controller</a>
-    <a href="about.php" id="about" class="btn btn-outline-light btn-sm" role="button">About</a>
+    <a href="about.php" id="about" class="btn btn-outline-light btn-sm">About</a>
+    <form class="search-container mx-auto">
+      <div class="input-group">
+        <input
+          type="text"
+          id="gameSearch"
+          class="form-control bg-dark text-light border-secondary"
+          placeholder="Search titles..."
+          aria-label="Search titles"
+        >
+        <span class="input-group-text bg-dark border-secondary"><i class="bi bi-search text-light"></i></span>
+      </div>
+    </form>
       <?php if ($userId): ?>
         <div class="d-flex align-items-center ms-auto">
           <?php
@@ -68,15 +80,6 @@ $voteAgg = [];
   <h3>Test content!</h3>
   <p>Lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
 </div>
-  <div class="search-container mb-3 px-2">
-    <input
-      type="text"
-      id="gameSearch"
-      class="form-control bg-dark text-light"
-      placeholder="Search titles..."
-      aria-label="Search titles"
-    >
-  </div>
   <div class="games-list"></div>
   <div class="text-center my-3">
     <button id="loadMoreBtn" class="btn btn-outline-light">Load More</button>
