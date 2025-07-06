@@ -71,7 +71,7 @@ foreach ($games as $game) {
 
     echo '<div class="game-block collapsed" data-game-id="'.$gid.'">';
     echo '  <div class="header-row">';
-    echo '    <img class="cover" loading="lazy" src="'.htmlspecialchars($capsuleLgURL).'" alt="&nbsp;">';
+    echo '    <img class="cover" loading="lazy" src="'.htmlspecialchars($capsuleLgURL).'" onerror="this.onerror=null;this.src=\''.htmlspecialchars($headerURL).'\'" alt="&nbsp;">';
     echo '    <h1 class="title"><b>'.htmlspecialchars($game['name']).'</b></h1>';
     echo '    <img class="majority-icon" src="'.$majorIcon.'" alt="majority vote">';
     echo '  </div>';
