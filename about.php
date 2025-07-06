@@ -10,7 +10,7 @@
 </head>
 <body>
 <nav class="navbar navbar-dark bg-dark">
-  <div class="container-fluid">
+  <div class="container-fluid justify-content-start">
     <a class="navbar-brand">KBM vs Controller</a>
     <a href="index.php" id="home" class="btn btn-outline-light btn-sm" role="button">Home</a>
   </div>
