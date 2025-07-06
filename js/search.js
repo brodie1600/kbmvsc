@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
         if (!window.isLoggedIn) {
           if (typeof showAlert === 'function') {
-            showAlert('You must be logged in to vote!', 'warning');
+            showAlert('notLoggedIn');
           }
           return;
         }
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
           if (!data.success) {
             if (typeof showAlert === 'function') {
-              showAlert(data.error || 'Error submitting vote.', 'warning');
+              showAlert('submitError', { text: data.error || window.alertConfigs.submitError.text });
             }
             return;
           }
@@ -74,10 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(err => {
           if (err === 'rate_limit') {
             if (typeof showAlert === 'function') {
-              showAlert("You're voting too fast! Please wait a moment.", 'primary');
+              showAlert('rateLimit');
             }
           } else if (typeof showAlert === 'function') {
-            showAlert('Network error—please try again.', 'warning');
+            showAlert('networkError');
           }
         });
       });

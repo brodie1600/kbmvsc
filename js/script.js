@@ -4,49 +4,56 @@
 let currentAlert = null;
 let alertTimer   = null;
 
-function showAlert(message, type = 'danger') {
+function showAlert(idOrMsg, opts = {}) {
   const container = document.getElementById('alert-container');
   if (!container) return;
 
-  // If already showing, update text & reset timer
+  const base = window.alertConfigs && window.alertConfigs[idOrMsg];
+  const defaults = { text: '', type: 'danger', fade: true, autoHide: true, timeout: 5000, dismissible: true };
+  const cfg = Object.assign({}, defaults, base ? base : { text: idOrMsg }, opts);
+
   if (currentAlert) {
-    currentAlert.querySelector('.alert-body').textContent = message;
+    currentAlert.querySelector('.alert-body').textContent = cfg.text;
     resetTimer();
     return;
   }
 
-  // Create the alert with only .fade (no .show yet)
   const alertDiv = document.createElement('div');
-  alertDiv.className = `alert alert-${type} alert-dismissible fade`;
+  let classes = `alert alert-${cfg.type}`;
+  if (cfg.dismissible) classes += ' alert-dismissible';
+  if (cfg.fade) classes += ' fade';
+  alertDiv.className = classes;
   alertDiv.setAttribute('role', 'alert');
   alertDiv.setAttribute('data-bs-theme', 'dark');
-  alertDiv.innerHTML = `
-    <span class="alert-body">${message}</span>
-    <button type="button" class="btn-close btn-close-white" aria-label="Close"></button>
-  `;
+  let html = `<span class="alert-body">${cfg.text}</span>`;
+  if (cfg.dismissible) {
+    html += '<button type="button" class="btn-close btn-close-white" aria-label="Close"></button>';
+  }
+  alertDiv.innerHTML = html;
   container.append(alertDiv);
   currentAlert = alertDiv;
 
-  // Trigger a reflow, then add .show for fade-in
-  requestAnimationFrame(() => alertDiv.classList.add('show'));
+  if (cfg.fade) requestAnimationFrame(() => alertDiv.classList.add('show'));
 
-  // Dismiss helper (fade-out then remove)
   function dismiss() {
-    alertDiv.classList.remove('show');
-    alertDiv.addEventListener('transitionend', () => {
+    if (cfg.fade) {
+      alertDiv.classList.remove('show');
+      alertDiv.addEventListener('transitionend', () => {
+        if (alertDiv.parentElement) alertDiv.remove();
+        if (currentAlert === alertDiv) currentAlert = null;
+      }, { once: true });
+    } else {
       if (alertDiv.parentElement) alertDiv.remove();
       if (currentAlert === alertDiv) currentAlert = null;
-    }, { once: true });
+    }
     clearTimeout(alertTimer);
   }
 
-  // Wire the × button
-  alertDiv.querySelector('.btn-close').addEventListener('click', dismiss);
+  if (cfg.dismissible) alertDiv.querySelector('.btn-close').addEventListener('click', dismiss);
 
-  // Auto-dismiss after 5 s
   function resetTimer() {
     clearTimeout(alertTimer);
-    alertTimer = setTimeout(dismiss, 5000);
+    if (cfg.autoHide && cfg.timeout > 0) alertTimer = setTimeout(dismiss, cfg.timeout);
   }
   resetTimer();
 }
@@ -55,7 +62,11 @@ function showAlert(message, type = 'danger') {
 let currentModalAlert = null;
 let modalAlertTimer   = null;
 
-function showModalAlert(message, type = 'danger') {
+function showModalAlert(idOrMsg, opts = {}) {
+  const base = window.alertConfigs && window.alertConfigs[idOrMsg];
+  const defaults = { text: '', type: 'danger', fade: true, autoHide: true, timeout: 5000, dismissible: true };
+  const cfg = Object.assign({}, defaults, base ? base : { text: idOrMsg }, opts);
+
   // If one is already up, dismiss it immediately
   if (currentModalAlert) {
     clearTimeout(modalAlertTimer);
@@ -68,9 +79,12 @@ function showModalAlert(message, type = 'danger') {
   if (!dialog) return;
   const rect = dialog.getBoundingClientRect();
 
-  // create alert DIV with .fade only
+  // create alert DIV
   const alertDiv = document.createElement('div');
-  alertDiv.className = `alert alert-${type} alert-dismissible fade`;
+  let classes = `alert alert-${cfg.type}`;
+  if (cfg.dismissible) classes += ' alert-dismissible';
+  if (cfg.fade) classes += ' fade';
+  alertDiv.className = classes;
   alertDiv.setAttribute('role', 'alert');
   alertDiv.setAttribute('data-bs-theme', 'dark');
   alertDiv.style.position = 'absolute';
@@ -78,31 +92,33 @@ function showModalAlert(message, type = 'danger') {
   alertDiv.style.left     = `${rect.left}px`;
   alertDiv.style.width    = `${rect.width}px`;
   alertDiv.style.zIndex   = '1060';
-  alertDiv.innerHTML = `
-    ${message}
-    <button type="button" class="btn-close btn-close-white" aria-label="Close"></button>
-  `;
+  let html = `${cfg.text}`;
+  if (cfg.dismissible) {
+    html += '<button type="button" class="btn-close btn-close-white" aria-label="Close"></button>';
+  }
+  alertDiv.innerHTML = html;
   document.body.append(alertDiv);
   currentModalAlert = alertDiv;
 
-  // fade-in
-  requestAnimationFrame(() => alertDiv.classList.add('show'));
+  if (cfg.fade) requestAnimationFrame(() => alertDiv.classList.add('show'));
 
   // helper to fade-out then remove
   function dismiss() {
-    alertDiv.classList.remove('show');
-    alertDiv.addEventListener('transitionend', () => {
+    if (cfg.fade) {
+      alertDiv.classList.remove('show');
+      alertDiv.addEventListener('transitionend', () => {
+        if (alertDiv.parentElement) alertDiv.remove();
+      }, { once: true });
+    } else {
       if (alertDiv.parentElement) alertDiv.remove();
-    }, { once: true });
+    }
     currentModalAlert = null;
     clearTimeout(modalAlertTimer);
   }
 
-  // close button wires into dismiss
-  alertDiv.querySelector('.btn-close').addEventListener('click', dismiss);
+  if (cfg.dismissible) alertDiv.querySelector('.btn-close').addEventListener('click', dismiss);
 
-  // auto-dismiss after 5 s
-  modalAlertTimer = setTimeout(dismiss, 5000);
+  if (cfg.autoHide && cfg.timeout > 0) modalAlertTimer = setTimeout(dismiss, cfg.timeout);
 }
 
 // Single DOMContentLoaded listener
@@ -115,10 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = emailInput.value.trim().toLowerCase();
       if (email.endsWith('@gmail.com')) {
         e.preventDefault();
-        showModalAlert(
-          'You cannot log in or register with a Gmail account using this form. Please use the "Continue with Google" button above.',
-          'warning'
-        );
+        showModalAlert('gmailAuth');
       }
     });
   }
@@ -131,12 +144,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = emailInput.value.trim();
       const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       if (!validEmail) {
-        return showModalAlert('Please enter a valid email address above first.', 'warning');
+        return showModalAlert('invalidEmail');
       }
       if (email.toLowerCase().endsWith('@gmail.com')) {
-        return showModalAlert(
-          'You cannot reset the password of a Gmail account using this form.', 'danger'
-        );
+        return showModalAlert('gmailReset');
       }
       // send the reset request
       fetch('forgot_password.php', {
@@ -146,13 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .then(res => res.json())
       .then(() => {
-        showModalAlert(
-          'If the email address is registered, please check your inbox for a link to reset your password.',
-          'success'
-        );
+        showModalAlert('resetNotice');
       })
       .catch(() => {
-        showModalAlert('Network error. Please try again.', 'danger');
+        showModalAlert('networkError', { type: 'danger' });
       });
     });
   }
@@ -172,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
       icon.addEventListener('click', e => {
         e.stopPropagation();
         if (!isLoggedIn) {
-          showAlert('You must be logged in to vote!', 'warning');
+          showAlert('notLoggedIn');
           return;
         }
         const type      = icon.dataset.voteType;
@@ -191,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => {
           if (res.status === 429) {
             // Rate-limit hit
-            showAlert("You're voting too fast! Please wait a moment.", 'primary');
+            showAlert('rateLimit');
             throw new Error('rate_limit');
           }
           return res.json();
@@ -199,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
           if (!data.success) {
             // other errors (e.g. db_error)
-            showAlert(data.error || 'Error submitting vote.', 'warning');
+            showAlert('submitError', { text: data.error || window.alertConfigs.submitError.text });
             return;
           }
           // --- success UI update ---
@@ -225,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // suppress the thrown rate_limit error
           if (err.message === 'rate_limit') return;
           // network or other exception
-          showAlert('Network error—please try again.', 'warning');
+          showAlert('networkError');
         });
       });
     });    
