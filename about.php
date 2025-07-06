@@ -1,3 +1,18 @@
+<?php
+$envPath = __DIR__ . '/.env';
+if (file_exists($envPath)) {
+    $vars = parse_ini_file($envPath, false, INI_SCANNER_RAW);
+    if (is_array($vars)) {
+        foreach ($vars as $k => $v) {
+            if (!array_key_exists($k, $_ENV)) {
+                $_ENV[$k] = $v;
+                putenv("$k=$v");
+            }
+        }
+    }
+}
+$contactEmail = $_ENV['CONTACT_EMAIL'] ?? getenv('CONTACT_EMAIL') ?? '';
+?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 <head>
@@ -19,11 +34,25 @@
 <div class="announce">
   <h3>KBM vs Controller</h3>
   <p>This lightweight application was designed to provide PC gamers with a quick and easy resource to determine which games are better played with a keyboard and mouse versus a controller. Some of you may do this already when starting a new game. For some titles, the difference is negligible. But for others, it may offer a completely different playing experience! KBM vs Controller is a centralized page that allows users to vote on which method they recommend and view the results of nearly every modern PC game.</p>
-  <p>If you think a game should be added to the list, see any incorrect or mismatched information, or encounter any issues while using the site, click this link to display a contact email.</p><br>
+  <p>If you think a game should be added to the list, see any incorrect or mismatched information, or encounter any issues while using the site,
+    <a href="#" id="showEmailLink">click this link</a> to display a contact email<span id="emailPlaceholder"></span>.</p><br>
   <p>Like what I'm doing?<br>
   <a href="https://www.buymeacoffee.com/kbmvscontroller" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/arial-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 144px !important;" ></a></p>
   <p>💚Zach</p>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const link = document.getElementById('showEmailLink');
+      const placeholder = document.getElementById('emailPlaceholder');
+      const email = <?php echo json_encode($contactEmail); ?>;
+      if (!link || !placeholder || !email) return;
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        placeholder.textContent = ' ' + email;
+        link.style.display = 'none';
+      });
+    });
+  </script>
 </body>
 </html>
