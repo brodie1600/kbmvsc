@@ -68,10 +68,10 @@ $voteAgg = [];
             $me = $u->fetchColumn();
           ?>
           <span class="navbar-text text-light me-3">Welcome, <?= htmlspecialchars($me) ?></span>
-          <a href="logout.php" class="btn btn-outline-light ms-auto">Log Out</a>
+          <a href="logout.php" class="btn btn-outline-light">Log Out</a>
         </div>
       <?php else: ?>
-        <button id="loginBtn" class="btn btn-outline-light ms-auto">Log In / Register</button>
+        <button id="loginBtn" class="btn btn-outline-light">Log In / Register</button>
       <?php endif; ?>
   </div>
 </nav>
