@@ -1,4 +1,8 @@
 /* Global typography & color */
+html, body {
+  height: 100%;
+}
+
 body {
   font-family: "Trebuchet MS", Helvetica, sans-serif;
   color: #ddd;
@@ -6,6 +10,8 @@ body {
   background: #000 url('../images/bg3.svg') repeat fixed top left;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 body::before {
@@ -17,13 +23,17 @@ body::before {
   z-index: 0;
 }
 
-#main, header, #footer, .announce, .games-list, #reset-password {
+#main, header, #footer, .announce, .games-list, #gameSearch, #reset-password {
   position: relative;
   z-index: 1;
 }
 
 #login-reg-form {
   border: 1px solid #aaa;
+}
+
+#main {
+  flex: 1 0 auto;
 }
 
 #reset-password {
@@ -56,6 +66,32 @@ body::before {
 
 .announce h3 {
   text-align: center;
+}
+
+#gameSearch {
+  width: 100%;
+  margin: 0;
+}
+
+.navbar .search-container {
+  width: 25%;
+}
+
+/* Keep search input and icon on one line */
+.navbar .search-container .input-group {
+  flex-wrap: nowrap;
+}
+
+/* Merge search input and icon borders */
+.navbar .input-group .form-control {
+  border-right: 0;
+}
+.navbar .input-group .input-group-text {
+  border-left: 0;
+}
+
+#gameSearch::placeholder {
+  color:#ddd;
 }
 
 /* Game block */
@@ -117,6 +153,7 @@ body::before {
   cursor: pointer;
 }
 .header-row .cover {
+  width: 212px;
   height: 80px;
   object-fit: cover;
   margin-right: 1rem;
