@@ -69,8 +69,25 @@ body::before {
 }
 
 #gameSearch {
+  width: 100%;
+  margin: 0;
+}
+
+.navbar .search-container {
   width: 25%;
-  margin: auto;
+}
+
+/* Keep search input and icon on one line */
+.navbar .search-container .input-group {
+  flex-wrap: nowrap;
+}
+
+/* Merge search input and icon borders */
+.navbar .input-group .form-control {
+  border-right: 0;
+}
+.navbar .input-group .input-group-text {
+  border-left: 0;
 }
 
 #gameSearch::placeholder {
