@@ -28,9 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
       icon.addEventListener('click', e => {
         e.stopPropagation();
         if (!window.isLoggedIn) {
-          if (typeof showAlert === 'function') {
-            showAlert('You must be logged in to vote!', 'warning');
-          }
+          showAlert('loginRequired');
           return;
         }
         const type      = icon.dataset.voteType;
@@ -48,9 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => res.status === 429 ? Promise.reject('rate_limit') : res.json())
         .then(data => {
           if (!data.success) {
-            if (typeof showAlert === 'function') {
-              showAlert(data.error || 'Error submitting vote.', 'warning');
-            }
+            showAlert('submitError', { text: data.error || AlertsConfig.submitError.text });
             return;
           }
           const k     = data.kbm;
@@ -73,11 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(err => {
           if (err === 'rate_limit') {
-            if (typeof showAlert === 'function') {
-              showAlert("You're voting too fast! Please wait a moment.", 'primary');
-            }
-          } else if (typeof showAlert === 'function') {
-            showAlert('Network error—please try again.', 'warning');
+            showAlert('rateLimit');
+          } else {
+            showAlert('networkError');
           }
         });
       });
