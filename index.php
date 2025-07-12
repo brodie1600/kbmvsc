@@ -78,8 +78,7 @@ $voteAgg = [];
   </div>
 </nav>
 <div class="announce">
-  <h3>Test content!</h3>
-  <p>Lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+  Click on a title to expand details and cast your vote. Votes are tied to your account, so you must be logged in first. Registration is easy and takes two clicks.
 </div>
   <div class="games-list"></div>
   <div class="text-center my-3">
