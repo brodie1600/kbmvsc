@@ -46,9 +46,11 @@ $voteAgg = [];
 <div id="main">
 <nav class="navbar navbar-dark bg-dark">
   <div class="container-fluid d-flex align-items-center position-relative">
-    <a class="navbar-brand">KBM vs Controller</a>
-    <a href="about.php" id="about" class="btn btn-outline-light btn-sm">About</a>
-    <form class="search-container mx-auto">
+    <div class="d-flex align-items-center" id="leftGroup">
+      <a class="navbar-brand mb-0">KBM vs Controller</a>
+      <a href="about.php" id="about" class="btn btn-outline-light btn-sm">About</a>
+    </div>
+    <form class="search-container position-absolute top-50 start-50 translate-middle">
       <div class="input-group">
         <input
           type="text"
@@ -61,7 +63,7 @@ $voteAgg = [];
       </div>
     </form>
       <?php if ($userId): ?>
-        <div class="d-flex align-items-center ms-auto">
+        <div class="d-flex align-items-center position-absolute end-0 pe-3">
           <?php
             $u = $pdo->prepare("SELECT email FROM users WHERE id = ?");
             $u->execute([$userId]);
@@ -71,7 +73,7 @@ $voteAgg = [];
           <a href="logout.php" class="btn btn-outline-light">Log Out</a>
         </div>
       <?php else: ?>
-        <button id="loginBtn" class="btn btn-outline-light">Log In / Register</button>
+        <button id="loginBtn" class="btn btn-outline-light position-absolute end-0 me-3">Log In / Register</button>
       <?php endif; ?>
   </div>
 </nav>
