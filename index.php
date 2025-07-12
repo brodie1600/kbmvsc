@@ -91,6 +91,7 @@ $voteAgg = [];
     const isLoggedIn = <?= $userId ? 'true' : 'false' ?>;
     window.isLoggedIn = isLoggedIn;
     const csrfToken = '<?= $_SESSION['csrf_token'] ?>';
+    window.csrfToken = csrfToken;
   </script>
   <script src="js/script.js"></script>
   <script src="js/search.js"></script>
