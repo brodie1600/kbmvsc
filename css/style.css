@@ -1,5 +1,5 @@
 /* Global typography & color */
-html, body {
+html {
   height: 100%;
 }
 
@@ -8,8 +8,11 @@ body {
   color: #ddd;
   position: relative;
   background: #000 url('../images/bg3.svg') repeat fixed top left;
+  min-height: 100%;
   margin: 0;
   padding: 0;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
   display: flex;
   flex-direction: column;
 }
@@ -48,13 +51,15 @@ body::before {
 .navbar {
   width: 100%;
   position: fixed;
+  margin-bottom: 3em;
   z-index: 2;
+  left: 0;
+  top: 0;
 }
 
 .announce {
   color: #ddd;
   width: 50%;
-  margin-top: 3rem;
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 3rem;
@@ -139,6 +144,9 @@ body::before {
   border-top: 1px solid #666;
   margin-top: 3em;
   padding: 0.75rem;
+  position: fixed;
+  left: 0;
+  bottom: 0;
 }
 
 #footer p {

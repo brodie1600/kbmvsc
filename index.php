@@ -77,7 +77,6 @@ $voteAgg = [];
       <?php endif; ?>
   </div>
 </nav>
-<br>
 <div class="announce">
   <h3>Test content!</h3>
   <p>Lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
