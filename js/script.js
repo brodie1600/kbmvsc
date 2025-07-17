@@ -1,111 +1,7 @@
-// script.js
+// script.js - site interactions that rely on Alerts
 
-// keep references so we never create more than one
-let currentAlert = null;
-let alertTimer   = null;
+// Ensure Alerts.js is loaded before this file
 
-function showAlert(message, type = 'danger') {
-  const container = document.getElementById('alert-container');
-  if (!container) return;
-
-  // If already showing, update text & reset timer
-  if (currentAlert) {
-    currentAlert.querySelector('.alert-body').textContent = message;
-    resetTimer();
-    return;
-  }
-
-  // Create the alert with only .fade (no .show yet)
-  const alertDiv = document.createElement('div');
-  alertDiv.className = `alert alert-${type} alert-dismissible fade`;
-  alertDiv.setAttribute('role', 'alert');
-  alertDiv.setAttribute('data-bs-theme', 'dark');
-  alertDiv.innerHTML = `
-    <span class="alert-body">${message}</span>
-    <button type="button" class="btn-close btn-close-white" aria-label="Close"></button>
-  `;
-  container.append(alertDiv);
-  currentAlert = alertDiv;
-
-  // Trigger a reflow, then add .show for fade-in
-  requestAnimationFrame(() => alertDiv.classList.add('show'));
-
-  // Dismiss helper (fade-out then remove)
-  function dismiss() {
-    alertDiv.classList.remove('show');
-    alertDiv.addEventListener('transitionend', () => {
-      if (alertDiv.parentElement) alertDiv.remove();
-      if (currentAlert === alertDiv) currentAlert = null;
-    }, { once: true });
-    clearTimeout(alertTimer);
-  }
-
-  // Wire the × button
-  alertDiv.querySelector('.btn-close').addEventListener('click', dismiss);
-
-  // Auto-dismiss after 5 s
-  function resetTimer() {
-    clearTimeout(alertTimer);
-    alertTimer = setTimeout(dismiss, 5000);
-  }
-  resetTimer();
-}
-
-// ensures only one modal-alert exists at a time
-let currentModalAlert = null;
-let modalAlertTimer   = null;
-
-function showModalAlert(message, type = 'danger') {
-  // If one is already up, dismiss it immediately
-  if (currentModalAlert) {
-    clearTimeout(modalAlertTimer);
-    currentModalAlert.remove();
-    currentModalAlert = null;
-  }
-
-  // find modal-dialog and position
-  const dialog = document.querySelector('#authModal .modal-dialog');
-  if (!dialog) return;
-  const rect = dialog.getBoundingClientRect();
-
-  // create alert DIV with .fade only
-  const alertDiv = document.createElement('div');
-  alertDiv.className = `alert alert-${type} alert-dismissible fade`;
-  alertDiv.setAttribute('role', 'alert');
-  alertDiv.setAttribute('data-bs-theme', 'dark');
-  alertDiv.style.position = 'absolute';
-  alertDiv.style.top      = `${rect.bottom + 8}px`;
-  alertDiv.style.left     = `${rect.left}px`;
-  alertDiv.style.width    = `${rect.width}px`;
-  alertDiv.style.zIndex   = '1060';
-  alertDiv.innerHTML = `
-    ${message}
-    <button type="button" class="btn-close btn-close-white" aria-label="Close"></button>
-  `;
-  document.body.append(alertDiv);
-  currentModalAlert = alertDiv;
-
-  // fade-in
-  requestAnimationFrame(() => alertDiv.classList.add('show'));
-
-  // helper to fade-out then remove
-  function dismiss() {
-    alertDiv.classList.remove('show');
-    alertDiv.addEventListener('transitionend', () => {
-      if (alertDiv.parentElement) alertDiv.remove();
-    }, { once: true });
-    currentModalAlert = null;
-    clearTimeout(modalAlertTimer);
-  }
-
-  // close button wires into dismiss
-  alertDiv.querySelector('.btn-close').addEventListener('click', dismiss);
-
-  // auto-dismiss after 5 s
-  modalAlertTimer = setTimeout(dismiss, 5000);
-}
-
-// Single DOMContentLoaded listener
 document.addEventListener('DOMContentLoaded', () => {
   // 1) Block Gmail addresses on manual login/register
   const authForm  = document.getElementById('authForm');
@@ -115,10 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = emailInput.value.trim().toLowerCase();
       if (email.endsWith('@gmail.com')) {
         e.preventDefault();
-        showModalAlert(
-          'You cannot log in or register with a Gmail account using this form. Please use the "Continue with Google" button above.',
-          'warning'
-        );
+        Alerts.showModal('loginGmailBlock');
       }
     });
   }
@@ -131,12 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = emailInput.value.trim();
       const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       if (!validEmail) {
-        return showModalAlert('Please enter a valid email address above first.', 'warning');
+        return Alerts.showModal('forgotInvalidEmail');
       }
       if (email.toLowerCase().endsWith('@gmail.com')) {
-        return showModalAlert(
-          'You cannot reset the password of a Gmail account using this form.', 'danger'
-        );
+        return Alerts.showModal('forgotGmailAccount');
       }
       // send the reset request
       fetch('forgot_password.php', {
@@ -146,13 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .then(res => res.json())
       .then(() => {
-        showModalAlert(
-          'If the email address is registered, please check your inbox for a link to reset your password.',
-          'success'
-        );
+        Alerts.showModal('forgotSuccess');
       })
       .catch(() => {
-        showModalAlert('Network error. Please try again.', 'danger');
+        Alerts.showModal('forgotNetworkError');
       });
     });
   }
@@ -172,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
       icon.addEventListener('click', e => {
         e.stopPropagation();
         if (!isLoggedIn) {
-          showAlert('You must be logged in to vote!', 'warning');
+          Alerts.show('voteNotLoggedIn');
           return;
         }
         const type      = icon.dataset.voteType;
@@ -191,15 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => {
           if (res.status === 429) {
             // Rate-limit hit
-            showAlert("You're voting too fast! Please wait a moment.", 'primary');
+            Alerts.show('voteRateLimit');
             throw new Error('rate_limit');
           }
           return res.json();
         })
         .then(data => {
           if (!data.success) {
-            // other errors (e.g. db_error)
-            showAlert(data.error || 'Error submitting vote.', 'warning');
+            Alerts.show('voteError', { message: data.error || Alerts.config.voteError.message });
             return;
           }
           // --- success UI update ---
@@ -225,9 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
           // suppress the thrown rate_limit error
           if (err.message === 'rate_limit') return;
           // network or other exception
-          showAlert('Network error—please try again.', 'warning');
+          Alerts.show('voteNetworkError');
         });
       });
-    });    
+    });
   });
 });
