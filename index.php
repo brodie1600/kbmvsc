@@ -78,7 +78,7 @@ $voteAgg = [];
   </div>
 </nav>
 <div class="announce">
-  Click on a title to expand details and cast your vote. Votes are tied to your account, so you must be logged in first. Registration is easy and takes two clicks.
+  Click on a title to expand details and cast your vote. Votes are tied to your account, so you must be logged in first. Registration is easy and takes three clicks.
 </div>
   <div class="games-list"></div>
   <div class="text-center my-3">
