@@ -26,7 +26,7 @@ body::before {
   z-index: 0;
 }
 
-#main, header, #footer, .announce, .games-list, #gameSearch, #reset-password {
+#main, header, #footer, .announce, .privacy, .games-list, #gameSearch, #reset-password {
   position: relative;
   z-index: 1;
 }
@@ -71,6 +71,22 @@ body::before {
 }
 
 .announce h3 {
+  text-align: center;
+}
+
+.privacy {
+  color: #ddd;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 3rem;
+  background: #080808;
+  border: 1px solid #777;
+  border-radius: 8px;
+  padding: 1rem 1rem;
+}
+
+.privacy h3, .privacy h6 {
   text-align: center;
 }
 
