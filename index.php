@@ -262,7 +262,8 @@ function handleCredentialResponse(response) {
 <div id="footer">
   <p class="text-center mb-0">
     This website is not affiliated with Steam, Valve, or any game developer/publisher.<br>
-    All copyrights and trademarks are property of their respective owners.
+    All copyrights and trademarks are property of their respective owners.<br>
+    <a href="privacy.php">Privacy Policy</a>
   </p>
 </div>
 </body>
