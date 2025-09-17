@@ -55,6 +55,11 @@ $contactEmail = $_ENV['CONTACT_EMAIL'] ?? getenv('CONTACT_EMAIL') ?? '';
         });
     });
   </script>
-
+<div id="footer">
+  <p class="text-center mb-0">
+    This website is not affiliated with Steam, Valve, or any game developer/publisher.<br>
+    All copyrights and trademarks are property of their respective owners.
+  </p>
+</div>
 </body>
 </html>

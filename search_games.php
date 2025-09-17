@@ -21,6 +21,24 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $games = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+/**
+ * Returns a relative path to a locally stored image for a given non-Steam game ID.
+ */
+function findLocalGameImage(int $gameId): ?string
+{
+    static $extensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    $baseDir = __DIR__ . '/images';
+
+    foreach ($extensions as $ext) {
+        $fileName = $gameId . '.' . $ext;
+        if (is_file($baseDir . '/' . $fileName)) {
+            return 'images/' . $fileName;
+        }
+    }
+
+    return null;
+}
+
 $ids = array_column($games, 'id');
 $voteAgg   = [];
 $userVotes = [];
@@ -50,9 +68,10 @@ if ($ids) {
 }
 
 foreach ($games as $game) {
-    $gid    = (int)$game['id'];
-    $counts = $voteAgg[$gid] ?? ['kbm'=>0,'controller'=>0];
-    $your   = $userVotes[$gid] ?? null;
+    $gid     = (int)$game['id'];
+    $isSteam = isset($game['is_steam']) ? (int)$game['is_steam'] : 1;
+    $counts  = $voteAgg[$gid] ?? ['kbm'=>0,'controller'=>0];
+    $your    = $userVotes[$gid] ?? null;
 
     $majorIcon = 'icons/question.svg';
     if ($counts['kbm'] > $counts['controller']) {
@@ -61,8 +80,14 @@ foreach ($games as $game) {
         $majorIcon = 'icons/controller-lgtong.svg';
     }
 
-    $headerURL    = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$gid}/header.jpg";
-    $capsuleLgURL = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$gid}/capsule_231x87.jpg";
+    if ($isSteam) {
+        $headerURL    = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$gid}/header.jpg";
+        $capsuleLgURL = "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{$gid}/capsule_231x87.jpg";
+    } else {
+        $localImage   = findLocalGameImage($gid) ?? 'images/' . $gid . '.jpg';
+        $headerURL    = $localImage;
+        $capsuleLgURL = $localImage;
+    }
 
     $total = $counts['kbm'] + $counts['controller'];
     $pct   = $total ? ($counts['kbm']/$total)*100 : 50;

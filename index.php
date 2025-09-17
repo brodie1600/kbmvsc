@@ -77,10 +77,8 @@ $voteAgg = [];
       <?php endif; ?>
   </div>
 </nav>
-<br>
 <div class="announce">
-  <h3>Test content!</h3>
-  <p>Lorum ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+  Click on a title to expand details and cast your vote. Votes are tied to your account, so you must be logged in first. Registration is easy and takes three clicks.
 </div>
   <div class="games-list"></div>
   <div class="text-center my-3">
@@ -89,8 +87,11 @@ $voteAgg = [];
   </div>
   <script>
     const isLoggedIn = <?= $userId ? 'true' : 'false' ?>;
+    window.isLoggedIn = isLoggedIn;
     const csrfToken = '<?= $_SESSION['csrf_token'] ?>';
+    window.csrfToken = csrfToken;
   </script>
+  <script src="js/alerts.js"></script>
   <script src="js/script.js"></script>
   <script src="js/search.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
@@ -220,11 +221,11 @@ function handleCredentialResponse(response) {
       // reload so navbar updates and votes can work
       window.location.reload();
     } else {
-      showModalAlert(data.error || 'Google sign-in failed.', 'danger');
+      Alerts.showModal('googleSigninError', { message: data.error || Alerts.config.googleSigninError.message });
     }
   })
   .catch(() => {
-    showModalAlert('Network error during Google sign-in.', 'danger');
+    Alerts.showModal('googleSigninNetworkError');
   });
 }
 </script>
