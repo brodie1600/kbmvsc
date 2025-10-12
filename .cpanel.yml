@@ -1,7 +1,0 @@
----
-deployment:
-  tasks:
-    - export DEPLOYPATH=/home/kbmvscon/public_html/
-    - /usr/bin/test -f /home/kbmvscon/config/env/.env.production || (echo "Missing .env.production" && exit 1)
-    - /usr/bin/rsync -az --delete --exclude ".git" --exclude ".cpanel.yml" ./ $DEPLOYPATH
-    - /usr/local/cpanel/bin/ea_php_cli -d opcache.enable_cli=1 -r 'opcache_reset();'
