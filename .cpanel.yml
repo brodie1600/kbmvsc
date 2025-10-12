@@ -1,23 +1,7 @@
 ---
 deployment:
   tasks:
-    # Figure out which branch we just pulled
-    - export BRANCH=$(/usr/bin/git rev-parse --abbrev-ref HEAD)
-
-    # Choose target based on branch name
-    - if [ "$BRANCH" = "main" ]; then export DEPLOYPATH=/home/kbmvscon/public_html/; fi
-    - if [ "$BRANCH" = "staging" ]; then export DEPLOYPATH=/home/kbmvscon/staging_html/; fi
-    - if [ -z "$DEPLOYPATH" ]; then echo "Unknown branch: $BRANCH"; exit 1; fi
-
-    # Sanity: required out-of-root env file must exist
-    - if [ "$BRANCH" = "main" ]; then /usr/bin/test -f /home/kbmvscon/config/env/.env.production || (echo "Missing .env.production" && exit 1); fi
-    - if [ "$BRANCH" = "staging" ]; then /usr/bin/test -f /home/kbmvscon/config/env/.env.staging || (echo "Missing .env.staging" && exit 1); fi
-
-    # Rsync repo → docroot (clean, exclude dot-git and deployment file)
-    - /usr/bin/rsync -az --delete \
-        --exclude ".git" \
-        --exclude ".cpanel.yml" \
-        ./ $DEPLOYPATH
-
-    # Opcache refresh (optional)
+    - export DEPLOYPATH=/home/kbmvscon/public_html/
+    - /usr/bin/test -f /home/kbmvscon/config/env/.env.production || (echo "Missing .env.production" && exit 1)
+    - /usr/bin/rsync -az --delete --exclude ".git" --exclude ".cpanel.yml" ./ $DEPLOYPATH
     - /usr/local/cpanel/bin/ea_php_cli -d opcache.enable_cli=1 -r 'opcache_reset();'
