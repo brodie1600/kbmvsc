@@ -1,5 +1,4 @@
 sitemap.xml
 robots.txt
-.env
-.env.*
 .htaccess
+.cpanel.yml
