@@ -8,16 +8,16 @@ $input     = json_decode(file_get_contents('php://input'), true);
 $id_token  = $input['id_token'] ?? '';
 
 if (! $id_token) {
-    echo json_encode(['success'=>false,'error'=>'No token provided.']);
-    exit;
+  echo json_encode(['success'=>false,'alertKey'=>'googleSigninNoToken']);
+  exit;
 }
 
 // Verify the token with Google
 $client = new Google_Client(['client_id'=>GOOGLE_CLIENT_ID]);
 $payload = $client->verifyIdToken($id_token);
 if (! $payload) {
-    echo json_encode(['success'=>false,'error'=>'Invalid ID token.']);
-    exit;
+  echo json_encode(['success'=>false,'alertKey'=>'googleSigninInvalidToken']);
+  exit;
 }
 
 $email     = $payload['email'];
@@ -67,6 +67,6 @@ catch (Exception $e) {
     error_log($msg, 3, __DIR__ . '/../logs/oauth_errors.log');
 
     // Return error
-    echo json_encode(['success'=>false,'error'=>'Server error.']);
+    echo json_encode(['success'=>false,'alertKey'=>'googleSigninServerError']);
     exit;
 }

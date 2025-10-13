@@ -19,7 +19,7 @@
     },
     forgotGmailAccount: {
       message: 'You cannot reset the password of a Gmail account using this form.',
-      type: 'danger'
+      type: 'warning'
     },
     forgotSuccess: {
       message: 'If the email address is registered, please check your inbox for a link to reset your password.',
@@ -33,24 +33,48 @@
       message: 'You must be logged in to vote!',
       type: 'warning'
     },
+    voteInvalidCsrf: {
+      message: 'Invalid CSRF token. Please refresh the page and try again.',
+      type: 'danger'
+    },
     voteRateLimit: {
       message: "You're voting too fast! Please wait a moment.",
       type: 'primary'
     },
     voteError: {
       message: 'Error submitting vote.',
-      type: 'warning'
+      type: 'danger'
+    },
+    voteInvalidInput: {
+      message: 'Invalid vote request.',
+      type: 'danger'
+    },
+    voteServerError: {
+      message: 'A server error prevented your vote from being saved. Please try again.',
+      type: 'danger'
     },
     voteNetworkError: {
-      message: 'Network error—please try again.',
-      type: 'warning'
+      message: 'Network error. Please try again.',
+      type: 'danger'
     },
     googleSigninError: {
-      message: 'Google sign-in failed.',
+      message: 'Google sign-in failed. Please try again.',
+      type: 'danger'
+    },
+    googleSigninNoToken: {
+      message: 'No token provided.',
+      type: 'danger'
+    },
+    googleSigninInvalidToken: {
+      message: 'Invalid ID token.',
+      type: 'danger'
+    },
+    googleSigninServerError: {
+      message: 'A server error occurred. Please try again.',
       type: 'danger'
     },
     googleSigninNetworkError: {
-      message: 'Network error during Google sign-in.',
+      message: 'Network error during Google sign-in. Please try again.',
       type: 'danger'
     }
   };

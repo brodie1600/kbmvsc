@@ -221,7 +221,8 @@ function handleCredentialResponse(response) {
       // reload so navbar updates and votes can work
       window.location.reload();
     } else {
-      Alerts.showModal('googleSigninError', { message: data.error || Alerts.config.googleSigninError.message });
+      const alertKey = data.alertKey || 'googleSigninError';
+      Alerts.showModal(alertKey);
     }
   })
   .catch(() => {

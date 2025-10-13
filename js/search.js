@@ -46,7 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => res.status === 429 ? Promise.reject('rate_limit') : res.json())
         .then(data => {
           if (!data.success) {
-            Alerts.show('voteError', { message: data.error || Alerts.config.voteError.message });
+            const alertKey = data.alertKey || 'voteError';
+            Alerts.show(alertKey);
             return;
           }
           const k     = data.kbm;

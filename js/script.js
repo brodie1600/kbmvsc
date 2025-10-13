@@ -86,7 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(data => {
           if (!data.success) {
-            Alerts.show('voteError', { message: data.error || Alerts.config.voteError.message });
+            const alertKey = data.alertKey || 'voteError';
+            Alerts.show(alertKey);
             return;
           }
           // --- success UI update ---

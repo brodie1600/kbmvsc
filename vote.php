@@ -7,7 +7,7 @@ $input    = json_decode(file_get_contents('php://input'), true);
 // CSRF
 if (($input['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
     http_response_code(400);
-    echo json_encode(['success'=>false,'error'=>'Invalid CSRF token']);
+    echo json_encode(['success'=>false,'alertKey'=>'voteInvalidCsrf']);
     exit;
 }
 
@@ -16,7 +16,7 @@ if (empty($_SESSION['user_id'])) {
     http_response_code(403);
     echo json_encode([
       'success' => false,
-      'error'   => 'You must be logged in to vote!'
+      'alertKey'   => 'voteNotLoggedIn'
     ]);
     exit;
 }
@@ -28,7 +28,7 @@ if ($now - $last < 2) {
     http_response_code(429);
     echo json_encode([
         'success' => false,
-        'error'   => 'Rate limit exceeded. Please wait before voting again.'
+        'alertKey'   => 'voteRateLimit'
     ]);
     exit;
 }
@@ -41,7 +41,8 @@ $gameId   = intval($input['game_id'] ?? 0);
 $voteType = $input['vote_type'] ?? '';
 
 if (!$gameId || ! in_array($voteType, ['kbm','controller'], true)) {
-    echo json_encode(['success'=>false,'error'=>'invalid_input']);
+    http_response_code(400);
+    echo json_encode(['success'=>false,'alertKey'=>'voteInvalidInput']);
     exit;
 }
 
@@ -76,7 +77,8 @@ try {
         $stmt->execute([':t'=>$voteType,':g'=>$gameId,':u'=>$userId]);
     }
 } catch (PDOException $e) {
-    echo json_encode(['success'=>false,'error'=>'db_error']);
+    http_response_code(500);
+    echo json_encode(['success'=>false,'alertKey'=>'voteServerError']);
     exit;
 }
 
