@@ -7,7 +7,7 @@ function authFlashRedirect(array $keys, string $email = '', array $options = [])
         'alerts' => [
             'keys'           => array_values(array_unique($keys)),
             'mode'           => $options['mode'] ?? 'modal',
-            'openAuth Modal' => $options['openAuthModal'] ?? true,
+            'openAuthModal' => $options['openAuthModal'] ?? true,
         ],
     ];
     header('Location: index.php#authModal');
@@ -16,7 +16,7 @@ function authFlashRedirect(array $keys, string $email = '', array $options = [])
 
 // Gmail-block server-side
 $email = trim($_POST['email'] ?? '');
-if (str_ends_with(strtolower($email) '@gmail.com')) {
+if (str_ends_with(strtolower($email), '@gmail.com')) {
     authFlashRedirect(['loginGmailBlock'], $email);
 }
 // CSRF check
