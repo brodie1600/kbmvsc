@@ -3,11 +3,11 @@ require_once __DIR__ . '/../config/config.php';
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // Grab & sanitize token
-$token   = isset($_GET['token']) ? trim($_GET['token']) : '';
-$errors  = [];
-$success = false;
-$email   = '';
-$userId  = null;
+$token      = isset($_GET['token']) ? trim($_GET['token']) : '';
+$alertKeys  = [];
+$success    = false;
+$email      = '';
+$userId     = null;
 $invalidTok = false;
 
 // 1) Fetch and validate token
@@ -21,17 +21,17 @@ if ($token) {
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$row) {
-        $errors[] = 'Invalid or expired token.';
+        $alertKeys[] = 'resetInvalidToken';
         $invalidTok = true;
     } elseif (strtotime($row['expires_at']) < time()) {
-        $errors[] = 'This reset link has expired.';
+        $alertKeys[] = 'resetExpiredToken';
         $invalidTok = true;
     } else {
         $email  = $row['email'];
         $userId = $row['user_id'];
     }
 } else {
-    $errors[] = 'No token provided.';
+    $alertKeys[] = 'resetNoToken';
     $invalidTok = true;
 }
 
@@ -42,13 +42,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$invalidTok) {
 
     // Validate passwords
     if (strlen($newPass) < 8) {
-        $errors[] = 'Password must be at least 8 characters.';
+        $alertKeys[] = 'resetPasswordTooShort';
     }
     if ($newPass !== $confirm) {
-        $errors[] = 'Passwords do not match.';
+        $alertKeys[] = 'resetPasswordMismatch'
     }
 
-    if (empty($errors)) {
+    if (empty($alertKeys)) {
         // 3) Update user password
         $hash = password_hash($newPass, PASSWORD_DEFAULT);
         $upd  = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
@@ -58,9 +58,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$invalidTok) {
         $del = $pdo->prepare("DELETE FROM password_resets WHERE token = ?");
         $del->execute([$token]);
 
-        $success = true;
+        $success   = true;
+        $alertKeys = ['resetSuccess'];
     }
 }
+
+$pageAlerts = null;
+if ($success) {
+  $pageAlerts = ['keys' => ['resetSuccess']];
+} elseif (!empty($alertKeys)) {
+  $pageAlerts = ['keys' => array_values(array_unique($alertKeys))];
+}
+$showForm = !$success && !$invalidTok;
 ?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
@@ -77,21 +86,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$invalidTok) {
   <div class="row justify-content-center">
     <div class="col-md-8">
       <h2 class="mb-4"><b>KBM vs Controller</b><br>Reset Password</h2>
+      <div id="alert-container" class="mb-4"></div>
 
-      <?php if ($success): ?>
-        <div class="alert alert-success fade show" role="alert" data-bs-theme="dark">
-          Your password has been reset. You may now <a href="index.php" class="alert-link">return to the login page</a>.
-        </div>
-
-      <?php elseif ($invalidTok): ?>
-        <div class="alert alert-danger" role="alert">
-          <?php foreach ($errors as $err): ?>
-            <div><?= htmlspecialchars($err) ?></div>
-          <?php endforeach; ?>
-        </div>
-
-      <?php else: ?>
-        <form method="post">
+    <?php if ($showForm): ?>
+      <form method="post">
           <div class="mb-3">
             <label>Email</label>
             <input type="text" class="form-control" value="<?= htmlspecialchars($email) ?>" disabled>
@@ -105,15 +103,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$invalidTok) {
             <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
           </div>
 
-          <!-- Validation errors appear HERE -->
-          <?php if (!empty($errors)): ?>
-            <div class="alert alert-danger" role="alert">
-              <?php foreach ($errors as $err): ?>
-                <div><?= htmlspecialchars($err) ?></div>
-              <?php endforeach; ?>
-            </div>
-          <?php endif; ?>
-
           <button type="submit" class="btn btn-outline-primary">Save</button>
         </form>
       <?php endif; ?>
@@ -121,6 +110,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$invalidTok) {
     </div>
   </div>
 </div>
+<script>
+  window.pageAlerts = <?= json_encode($pageAlerts, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+</script>
+<script src="js/alerts.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.pageAlerts && Array.isArray(window.pageAlerts.keys) && window.pageAlerts.keys.length) {
+      if (window.pageAlerts.keys.length === 1) {
+        Alerts.show(window.pageAlerts.keys[0]);
+      } else {
+        Alerts.showFromKeys(window.pageAlerts.keys);
+      }
+    }
+  });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

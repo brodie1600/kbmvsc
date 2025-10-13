@@ -1,34 +1,34 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 
-// Gmail-block server-side
-$email = trim($_POST['email'] ?? '');
-if (str_ends_with(strtolower($email), '@gmail.com')) {
+function authFlashRedirect(array $keys, string $email = '', array $options = []): void {
     $_SESSION['flash'] = [
-        'errors' => [
-            'You cannot log in or register with a Gmail account using this form. Please use the "Continue with Google" button above.'
-        ],
         'email'  => $email,
-        'type'   => 'warning'
-    ];
-    header('Location: index.php#authModal');
-    exit;
-}
-// CSRF check
-if (($_POST['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
-    $_SESSION['flash'] = [
-        'errors' => ['Invalid submission (CSRF token mismatch).'],
-        'email'  => trim($_POST['email'] ?? '')
+        'alerts' => [
+            'keys'           => array_values(array_unique($keys)),
+            'mode'           => $options['mode'] ?? 'modal',
+            'openAuth Modal' => $options['openAuthModal'] ?? true,
+        ],
     ];
     header('Location: index.php#authModal');
     exit;
 }
 
+// Gmail-block server-side
+$email = trim($_POST['email'] ?? '');
+if (str_ends_with(strtolower($email) '@gmail.com')) {
+    authFlashRedirect(['loginGmailBlock'], $email);
+}
+// CSRF check
+if (($_POST['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
+    authFlashRedirect(['authInvalidCsrf'], $email);
+}
+
 // Grab the form inputs
-$action   = $_POST['action']   ?? '';
-$email    = trim($_POST['email']   ?? '');
-$password = $_POST['password'] ?? '';
-$errors = [];
+$action    = $_POST['action']   ?? '';
+$email     = trim($_POST['email']   ?? '');
+$password  = $_POST['password'] ?? '';
+$errorKeys = [];
 
 // 0) reCAPTCHA check
 $recaptcha = $_POST['g-recaptcha-response'] ?? '';
@@ -37,33 +37,27 @@ $verifyUrl = 'https://www.google.com/recaptcha/api/siteverify'
            . '&response=' . urlencode($recaptcha);
 $resp = json_decode(file_get_contents($verifyUrl), true);
 if (empty($resp['success'])) {
-    $_SESSION['flash'] = [
-      'errors' => ['Please complete the CAPTCHA to prove you are not a robot.'],
-      'email'  => $email,
-      'type'   => 'warning'
-    ];
-    header('Location: index.php#authModal');
-    exit;
+    authFlashRedirect(['authRecaptchaRequired'], $email);
 }
 
 // 1) Basic validations
 if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    $errors[] = 'Please enter a valid email address.';
+    $errorKeys[] = 'authInvalidEmail';
 }
 if (strlen($password) < 8) {
-    $errors[] = 'Password must be at least 8 characters.';
+    $errorKeys[] = 'authPasswordTooShort';
 }
 
 $userId = null;
 
 // 2) If no validation errors, handle register vs login
-if (empty($errors)) {
+if (empty($errorKeys)) {
     if ($action === 'register') {
         // a) Check email uniqueness
         $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([ $email ]);
         if ($stmt->fetch()) {
-            $errors[] = 'Email address already registered. Please try again.';
+            $errorKeys[] = 'authEmailExists';
         } else {
             // b) Insert new user
             $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -86,24 +80,19 @@ if (empty($errors)) {
         $stmt->execute([ $email ]);
         $user = $stmt->fetch();
         if (! $user || ! password_verify($password, $user['password_hash'])) {
-            $errors[] = 'Invalid email/password combination. Please try again.';
+            $errorKeys[] = 'authInvalidCredentials';
         } else {
             $userId = $user['id'];
         }
     }
     else {
-        $errors[] = 'Unrecognized action.';
+        $errorKeys[] = 'authUnrecognizedAction';
     }
 }
 
 // 3) On errors, redirect back with flash data
-if (! empty($errors)) {
-    $_SESSION['flash'] = [
-      'errors' => $errors,
-      'email'  => $email
-    ];
-    header('Location: index.php#authModal');
-    exit;
+if (! empty($errorKeys)) {
+    authFlashRedirect($errorKeys, $email);
 }
 
 // 4) Regenerate session ID, then log the user in and redirect home

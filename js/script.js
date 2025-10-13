@@ -3,6 +3,37 @@
 // Ensure Alerts.js is loaded before this file
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (window.serverAlerts) {
+    const payload = window.serverAlerts;
+    const keys = Array.isArray(payload.keys) ? payload.keys : [];
+    const mode = payload.mode === 'modal' ? 'modal' : 'inline';
+    const openAuthModal = Boolean(payload.openAuthModal);
+
+    if (openAuthModal && window.bootstrap && window.bootstrap.Modal) {
+      const modalEl = document.getElementById('authModal');
+      if (modalEl) {
+        const modalInstance = window.bootstrap.modal.getOrCreateInstance(modalEl);
+        modalInstance.show();
+      }
+    }
+
+    if (keys.length) {
+      if (mode === 'modal') {
+        if (keys.length === 1) {
+          Alerts.showModal(keys[0]);
+        } else {
+          Alerts.showFromKeys(keys, { modal: true });
+        }
+      } else {
+        if (keys.length === 1) {
+          Alerts.show(keys[0]);
+        } else {
+          Alerts.showFromKeys(keys);
+        }
+      }
+    }
+  }
+  
   // 1) Block Gmail addresses on manual login/register
   const authForm  = document.getElementById('authForm');
   const emailInput = document.getElementById('authEmail');

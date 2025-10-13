@@ -37,6 +37,30 @@
       message: 'Invalid CSRF token. Please refresh the page and try again.',
       type: 'danger'
     },
+    authRecaptchaRequired: {
+      message: 'Please complete the CAPTCHA to prove you are not a robot.',
+      type: 'warning'
+    },
+    authInvalidEmail: {
+      message: 'Please enter a valid email address.',
+      type: 'warning'
+    },
+    authPasswordTooShort: {
+      message: 'Password must be at least 8 characters.',
+      type: 'warning'
+    },
+    authEmailExists: {
+      message: 'Email address already registered.',
+      type: 'warning'
+    },
+    authInvalidCredentials: {
+      message: 'Invalid email/password combination. Please try again.',
+      type: 'danger'
+    },
+    authUnrecognizedAction: {
+      message: 'Unrecognized action.',
+      type: 'danger'
+    },
     voteRateLimit: {
       message: "You're voting too fast! Please wait a moment.",
       type: 'primary'
@@ -76,6 +100,30 @@
     googleSigninNetworkError: {
       message: 'Network error during Google sign-in. Please try again.',
       type: 'danger'
+    },
+    resetInvalidToken: {
+      message: 'Invalid or expired token.',
+      type: 'danger'
+    },
+    resetExpiredToken: {
+      message: 'This reset link has expired.',
+      type: 'danger'
+    },
+    resetNoToken: {
+      message: 'No token provided.',
+      type: 'danger'
+    },
+    resetPasswordTooShort: {
+      message: 'Password must be at least 8 characters.',
+      type: 'warning'
+    },
+    resetPasswordMismatch: {
+      message: 'Passwords do not match.',
+      type: 'warning'
+    },
+    resetSuccess: {
+      message: 'Your password has been reset. You may now <a href="index.php" class="alert-link">return to the login page</a>.',
+      type: 'success'
     }
   };
 
@@ -180,9 +228,24 @@
     }
   }
 
+  function showFromKeys(keys=[], options={}){
+    if(!Array.isArray(keys) || !keys.length) return;
+    const validKeys = keys.filter(key => configs[key] && configs[key].message);
+    if(!validKeys.length) return;
+    const combinedMessage = validKeys.map(key => configs[key].message).join('<br>');
+    const baseKey = validKeys[0];
+    const overrides = { message: combinedMessage };
+    if(options.modal){
+      showModalAlert(baseKey, overrides);
+    } else {
+      showAlert(baseKey, overrides);
+    }
+  }
+
   window.Alerts = {
     show: showAlert,
     showModal: showModalAlert,
+    showFromKeys,
     config: configs
   };
   // Backward compatibility

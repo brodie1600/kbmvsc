@@ -1,11 +1,28 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 // Pull any flash data for errors and old inputs
-$flash     = $_SESSION['flash'] ?? [];
-$errors    = $flash['errors']     ?? [];
-$oldEmail  = $flash['email']      ?? '';
-$flashType = $flash['type']       ?? 'danger';
+$flash        = $_SESSION['flash'] ?? [];
+$oldEmail     = $flash['email']    ?? '';
+$alertDetails = $flash['alerts']   ?? null;
 unset($_SESSION['flash']);
+
+$serverAlertPayload = null;
+if ($alertDetails) {
+  $keys = array_values(array_filter(
+    $alertDetails['keys'] ?? [],
+    function ($k) {
+      return is_string($k) && $k !== '';
+    }
+  ));
+  $openAuthModal = !empty($alertDetails['openAuthModal']);
+  if ($keys || $openAuthModal) {
+    $serverAlertPayload = [
+      'keys'          => $keys,
+      'mode'          => $alertDetails['mode'] ?? 'modal',
+      'openAuthModal' => $openAuthModal,
+    ];
+  }
+}
 
 // 1. Determine current user
 $userId = $_SESSION['user_id'] ?? null;
@@ -90,6 +107,7 @@ $voteAgg = [];
     window.isLoggedIn = isLoggedIn;
     const csrfToken = '<?= $_SESSION['csrf_token'] ?>';
     window.csrfToken = csrfToken;
+    window.serverAlerts = <?= json_encode($serverAlertPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   </script>
   <script src="js/alerts.js"></script>
   <script src="js/script.js"></script>
@@ -145,18 +163,6 @@ $voteAgg = [];
               data-sitekey="<?= htmlspecialchars(RECAPTCHA_SITE_KEY) ?>"
             ></div>
           </div>
-
-
-          <!-- Error display -->
-            <?php if (!empty($errors)): ?>
-              <div class="alert alert-<?= htmlspecialchars($flashType) ?> fade show" role="alert" data-bs-theme="dark">
-                <span class="mb-0">
-                  <?php foreach ($errors as $err): ?>
-                    <?= htmlspecialchars($err) ?>
-                  <?php endforeach; ?>
-                </span>
-              </div>
-            <?php endif; ?>
             
           <div class="d-flex justify-content-between mt-3">
             <button
@@ -231,18 +237,6 @@ function handleCredentialResponse(response) {
 }
 </script>
 
-<?php if (!empty($errors)): ?>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // grab the modal element
-    var el = document.getElementById('authModal');
-    // initialize it
-    var myModal = new bootstrap.Modal(el);
-    // show it
-    myModal.show();
-  });
-</script>
-<?php endif; ?>
 <script>
   const authModal = new bootstrap.Modal(document.getElementById('authModal'));
   document.getElementById('loginBtn').onclick = () => authModal.show();
