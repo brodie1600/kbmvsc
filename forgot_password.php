@@ -55,8 +55,8 @@ try {
         // 7) Send the reset email
         $resetUrl = "https://kbmvscontroller.com/reset_password.php?token={$token}";
         $subject  = 'KBM vs Controller - Password Reset';
-        $message  = "You (or someone using this address) requested a password reset.\r\n\r\n"
-                  . "Click to set a new password:\r\n"
+        $message  = "You (or someone using this address) requested a password reset at kbmvscontroller.com.\r\n\r\n"
+                  . "Click the link below to set a new password:\r\n"
                   . "{$resetUrl}\r\n\r\n"
                   . "This link will expire in 1 hour.\r\n\r\n"
                   . "If you did not request this, you may safely delete this email.\r\n";

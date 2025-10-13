@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$invalidTok) {
         $alertKeys[] = 'resetPasswordTooShort';
     }
     if ($newPass !== $confirm) {
-        $alertKeys[] = 'resetPasswordMismatch'
+        $alertKeys[] = 'resetPasswordMismatch';
     }
 
     if (empty($alertKeys)) {
