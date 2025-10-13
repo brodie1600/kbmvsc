@@ -8,124 +8,182 @@
     fade: true
   };
 
-  const configs = {
-    loginGmailBlock: {
-      message: 'You cannot log in or register with a Gmail account using this form. Please use the "Continue with Google" button above.',
-      type: 'warning'
-    },
-    forgotInvalidEmail: {
-      message: 'Please enter a valid email address above first.',
-      type: 'warning'
-    },
-    forgotGmailAccount: {
-      message: 'You cannot reset the password of a Gmail account using this form.',
-      type: 'warning'
-    },
-    forgotSuccess: {
-      message: 'If the email address is registered, please check your inbox for a link to reset your password.',
-      type: 'success'
-    },
-    forgotNetworkError: {
-      message: 'Network error. Please try again.',
-      type: 'danger'
-    },
-    voteNotLoggedIn: {
-      message: 'You must be logged in to vote!',
-      type: 'warning'
-    },
-    voteInvalidCsrf: {
-      message: 'Invalid CSRF token. Please refresh the page and try again.',
-      type: 'danger'
-    },
-    authRecaptchaRequired: {
-      message: 'Please complete the CAPTCHA to prove you are not a robot.',
-      type: 'warning'
-    },
-    authInvalidEmail: {
-      message: 'Please enter a valid email address.',
-      type: 'warning'
-    },
-    authPasswordTooShort: {
-      message: 'Password must be at least 8 characters.',
-      type: 'warning'
-    },
-    authEmailExists: {
-      message: 'Email address already registered.',
-      type: 'warning'
-    },
-    authInvalidCredentials: {
-      message: 'Invalid email/password combination. Please try again.',
-      type: 'danger'
-    },
-    authUnrecognizedAction: {
-      message: 'Unrecognized action.',
-      type: 'danger'
-    },
-    voteRateLimit: {
-      message: "You're voting too fast! Please wait a moment.",
-      type: 'primary'
-    },
-    voteError: {
-      message: 'Error submitting vote.',
-      type: 'danger'
-    },
-    voteInvalidInput: {
-      message: 'Invalid vote request.',
-      type: 'danger'
-    },
-    voteServerError: {
-      message: 'A server error prevented your vote from being saved. Please try again.',
-      type: 'danger'
-    },
-    voteNetworkError: {
-      message: 'Network error. Please try again.',
-      type: 'danger'
-    },
-    googleSigninError: {
-      message: 'Google sign-in failed. Please try again.',
-      type: 'danger'
-    },
-    googleSigninNoToken: {
-      message: 'No token provided.',
-      type: 'danger'
-    },
-    googleSigninInvalidToken: {
-      message: 'Invalid ID token.',
-      type: 'danger'
-    },
-    googleSigninServerError: {
-      message: 'A server error occurred. Please try again.',
-      type: 'danger'
-    },
-    googleSigninNetworkError: {
-      message: 'Network error during Google sign-in. Please try again.',
-      type: 'danger'
-    },
-    resetInvalidToken: {
-      message: 'Invalid or expired token.',
-      type: 'danger'
-    },
-    resetExpiredToken: {
-      message: 'This reset link has expired.',
-      type: 'danger'
-    },
-    resetNoToken: {
-      message: 'No token provided.',
-      type: 'danger'
-    },
-    resetPasswordTooShort: {
-      message: 'Password must be at least 8 characters.',
-      type: 'warning'
-    },
-    resetPasswordMismatch: {
-      message: 'Passwords do not match.',
-      type: 'warning'
-    },
-    resetSuccess: {
-      message: 'Your password has been reset. You may now <a href="index.php" class="alert-link">return to the login page</a>.',
-      type: 'success'
-    }
-  };
+const configs = {
+  
+  // When a user attempts to register using an email address that already exists
+  authEmailExists: {
+    message: 'Email address already registered.',
+    type: 'warning'
+  },
+
+  // When a user attempts to login but provides a bad email address and/or password
+  authInvalidCredentials: {
+    message: 'Invalid email/password combination. Please try again.',
+    type: 'danger'
+  },
+
+  // When a user attempts to login or register but provides an invalid email address
+  authInvalidEmail: {
+    message: 'Please enter a valid email address.',
+    type: 'warning'
+  },
+
+  // When a user attempts to login or register but does not complete the CAPTCHA
+  authRecaptchaRequired: {
+    message: 'Please complete the CAPTCHA to prove you are not a robot.',
+    type: 'warning'
+  },
+
+  // When a user attempts to login or register but provides a password less than 8 characters
+  authPasswordTooShort: {
+    message: 'Password must be at least 8 characters.',
+    type: 'warning'
+  },
+
+  // General failure on auth.php
+  authUnrecognizedAction: {
+    message: 'Unrecognized action.',
+    type: 'danger'
+  },
+
+  // When a user has an email address ending in @gmail.com entered in the form and clicks the "Reset Password" link
+  forgotGmailAccount: {
+    message: 'You cannot reset the password of a Gmail account using this form.',
+    type: 'warning'
+  },
+
+  // When a user clicks the "Reset Password" link but does not have a valid email address entered in the form
+  forgotInvalidEmail: {
+    message: 'Please enter a valid email address above first.',
+    type: 'warning'
+  },
+
+  // When the "Reset Password" function fails due to a network error
+  forgotNetworkError: {
+    message: 'Network error. Please try again.',
+    type: 'danger'
+  },
+
+  // When a user successfully initiates a password reset
+  forgotSuccess: {
+    message: 'If the email address is registered, please check your inbox for a link to reset your password.',
+    type: 'success'
+  },
+
+  // Google sign-in failure
+  googleSigninError: {
+    message: 'Google sign-in failed. Please try again.',
+    type: 'danger'
+  },
+  
+  // Error with Google ID token when attempting to sign in
+  googleSigninInvalidToken: {
+    message: 'Invalid ID token.',
+    type: 'danger'
+  },
+
+  // Network error during Google sign-in
+  googleSigninNetworkError: {
+    message: 'Network error during Google sign-in. Please try again.',
+    type: 'danger'
+  },
+
+  // No token provided during Google sign-in
+  googleSigninNoToken: {
+    message: 'No token provided.',
+    type: 'danger'
+  },
+
+  // Server error occurred during Google sign-in
+  googleSigninServerError: {
+    message: 'A server error occurred. Please try again.',
+    type: 'danger'
+  },
+
+  // When a user has an email address ending in @gmail.com entered in the form and clicks the "Login" or "Register" buttons
+  loginGmailBlock: {
+    message: 'You cannot log in or register with a Gmail account using this form. Please use the "Continue with Google" button above.',
+    type: 'warning'
+  },
+
+  // When a user visits reset_password.php and provides a valid, expired token
+  resetExpiredToken: {
+    message: 'This reset link has expired.',
+    type: 'danger'
+  },
+
+  // When a user visits reset_password.php and provides an invalid token
+  resetInvalidToken: {
+    message: 'Invalid token.',
+    type: 'danger'
+  },
+
+  // When a user visits reset_password.php and does not provide a token
+  resetNoToken: {
+    message: 'No token provided.',
+    type: 'danger'
+  },
+
+  // When a user attempts to reset their password but provides a password less than 8 characters
+  resetPasswordTooShort: {
+    message: 'Password must be at least 8 characters.',
+    type: 'warning'
+  },
+
+  // When a user attepts to reset their password but the provided passwords do not match each other
+  resetPasswordMismatch: {
+    message: 'Passwords do not match.',
+    type: 'warning'
+  },
+
+  // When a user successfully resets their password
+  resetSuccess: {
+    message: 'Your password has been reset. You may now <a href="index.php" class="alert-link">return to the login page</a>.',
+    type: 'success'
+  },
+
+  // When the application cannot record a vote
+  voteError: {
+    message: 'Error submitting vote. Please try again.',
+    type: 'danger'
+  },
+
+  // Invalid CSRF token
+  voteInvalidCsrf: {
+    message: 'Invalid CSRF token. Please refresh the page and try again.',
+    type: 'danger'
+  },
+
+  // When the server receives an invalid vote input
+  voteInvalidInput: {
+    message: 'Invalid vote request.',
+    type: 'danger'
+  },
+
+  // Generic network error
+  voteNetworkError: {
+    message: 'Network error. Please try again.',
+    type: 'danger'
+  },
+
+  // When a user attempts to submit a vote but is not logged in
+  voteNotLoggedIn: {
+    message: 'You must be logged in to vote!',
+    type: 'warning'
+  },
+
+  // When a user attempts to submit multiple votes and exceeds the rate limit
+  voteRateLimit: {
+    message: "You're voting too fast! Please wait a moment.",
+    type: 'primary'
+  },
+
+  // Server could not record a vote
+  voteServerError: {
+    message: 'A server error prevented your vote from being saved. Please try again.',
+    type: 'danger'
+  }
+};
 
   let currentAlert = null;
   let alertTimer   = null;

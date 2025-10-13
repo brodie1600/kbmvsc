@@ -238,10 +238,28 @@ function handleCredentialResponse(response) {
 </script>
 
 <script>
-  const authModal = new bootstrap.Modal(document.getElementById('authModal'));
-  document.getElementById('loginBtn').onclick = () => authModal.show();
-  const loginBtn  = document.getElementById('loginBtn');
-  if (loginBtn) loginBtn.onclick = () => authModal.show();
+  (function () {
+    const modalEl = document.getElementById('authModal');
+    const loginBtn = document.getElementById('loginBtn');
+    if (modalEl && loginBtn) {
+      if (window.bootstrap && window.bootstrap.Modal) {
+        const authModal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+        loginBtn.addEventListener('click', () => authModal.show());
+      } else {
+        loginBtn.addEventListener('click', () => {
+          modalEl.classList.add('show');
+          modalEl.style.display = 'block';
+          modalEl.removeAttribute('aria-hidden');
+          document.body.classList.add('modal-open');
+          if (!document.querySelector('.modal-backdrop')) {
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            document.body.appendChild(backdrop);
+          }
+        });
+      }
+    }
+  })();
 
   // AJAX helper
   async function postJSON(url, data) {
