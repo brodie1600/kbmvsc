@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$invalidTok) {
         $alertKeys[] = 'resetPasswordTooShort';
     }
     if ($newPass !== $confirm) {
-        $alertKeys[] = 'resetPasswordMismatch'
+        $alertKeys[] = 'resetPasswordMismatch';
     }
 
     if (empty($alertKeys)) {
@@ -63,12 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$invalidTok) {
     }
 }
 
-$pageAlerts = null;
-if ($success) {
-  $pageAlerts = ['keys' => ['resetSuccess']];
-} elseif (!empty($alertKeys)) {
-  $pageAlerts = ['keys' => array_values(array_unique($alertKeys))];
-}
+$uniqueKeys = array_values(array_unique($alertKeys));
+$pageAlerts = $uniqueKeys ? ['keys' => $uniqueKeys] : null;
+
 $showForm = !$success && !$invalidTok;
 ?>
 <!DOCTYPE html>
@@ -116,12 +113,17 @@ $showForm = !$success && !$invalidTok;
 <script src="js/alerts.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    if (window.pageAlerts && Array.isArray(window.pageAlerts.keys) && window.pageAlerts.keys.length) {
-      if (window.pageAlerts.keys.length === 1) {
-        Alerts.show(window.pageAlerts.keys[0]);
-      } else {
-        Alerts.showFromKeys(window.pageAlerts.keys);
-      }
+    const alertData = window.pageAlerts;
+    const keys = alertData && Array.isArray(alertData.keys) ? alertData.keys : [];
+
+    if (!keys.length || typeof Alerts === 'undefined') {
+      return;
+    }
+
+    if (keys.length === 1) {
+      Alerts.show(keys[0]);
+    } else {
+      Alerts.showFromKeys(keys);
     }
   });
 </script>
