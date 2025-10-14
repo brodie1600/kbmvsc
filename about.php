@@ -1,5 +1,5 @@
 <?php
-require once __DIR__ . '../config/config.php';
+require_once __DIR__ . '../config/config.php';
 
 $contactEmail = $_ENV['CONTACT_EMAIL'] ?? getenv('CONTACT_EMAIL') ?? '';
 ?>
