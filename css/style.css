@@ -154,6 +154,18 @@ body::before {
   margin: 0;
 }
 
+/* Allow reset-password alerts to flow in the layout */
+#reset-password #alert-container {
+  position: static;
+  bottom: auto;
+  left: auto;
+  z-index: auto;
+}
+
+#reset-password #alert-container .alert {
+  margin-bottom: 1rem;
+}
+
 #footer {
   width: 100%;
   background: #080808;

@@ -2,7 +2,7 @@
   const defaultConfig = {
     message: '',
     type: 'danger',
-    dismissable: true,
+    dismissible: true,
     autoDismiss: true,
     timeout: 5000,
     fade: true
@@ -109,19 +109,28 @@ const configs = {
   // When a user visits reset_password.php and provides a valid, expired token
   resetExpiredToken: {
     message: 'This reset link has expired.',
-    type: 'danger'
+    type: 'danger',
+    dismissible: false,
+    autoDismiss: false,
+    timeout: 0
   },
 
   // When a user visits reset_password.php and provides an invalid token
   resetInvalidToken: {
     message: 'Invalid token.',
-    type: 'danger'
+    type: 'danger',
+    dismissible: false,
+    autoDismiss: false,
+    timeout: 0
   },
 
   // When a user visits reset_password.php and does not provide a token
   resetNoToken: {
     message: 'No token provided.',
-    type: 'danger'
+    type: 'danger',
+    dismissible: false,
+    autoDismiss: false,
+    timeout: 0
   },
 
   // When a user attempts to reset their password but provides a password less than 8 characters
@@ -139,7 +148,10 @@ const configs = {
   // When a user successfully resets their password
   resetSuccess: {
     message: 'Your password has been reset. You may now <a href="index.php" class="alert-link">return to the login page</a>.',
-    type: 'success'
+    type: 'success',
+    dismissible: false,
+    autoDismiss: false,
+    timeout: 0
   },
 
   // When the application cannot record a vote
@@ -189,6 +201,10 @@ const configs = {
   let alertTimer   = null;
   function showAlert(key, overrides={}){
     const cfg = { ...defaultConfig, ...(configs[key]||{}), ...overrides };
+    if(Object.prototype.hasOwnProperty.call(cfg, 'dismissable')){
+      cfg.dismissable = cfg.dismissible
+      delete cfg.dismissable;
+    }
     const container = document.getElementById('alert-container');
     if(!container || !cfg.message) return;
 
@@ -199,12 +215,12 @@ const configs = {
     }
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${cfg.type}` +
-      (cfg.dismissable ? ' alert-dismissible' : '') +
+      (cfg.dismissible ? ' alert-dismissible' : '') +
       (cfg.fade ? ' fade' : '');
     alertDiv.setAttribute('role','alert');
     alertDiv.setAttribute('data-bs-theme','dark');
     alertDiv.innerHTML = `<span class="alert-body">${cfg.message}</span>`;
-    if(cfg.dismissable){
+    if(cfg.dismissible){
       alertDiv.innerHTML += '<button type="button" class="btn-close btn-close-white" aria-label="Close"></button>';
     }
     container.append(alertDiv);
@@ -224,12 +240,12 @@ const configs = {
       }
       clearTimeout(alertTimer);
     }
-    if(cfg.dismissable){
+    if(cfg.dismissible){
       alertDiv.querySelector('.btn-close').addEventListener('click', dismiss);
     }
     function resetTimer(){
       clearTimeout(alertTimer);
-      if(cfg.autoDismiss) alertTimer=setTimeout(dismiss,cfg.timeout);
+      if(cfg.autoDismiss && cfg.timeout > 0) alertTimer=setTimeout(dismiss,cfg.timeout);
     }
     resetTimer();
   }
@@ -238,6 +254,10 @@ const configs = {
   let modalAlertTimer   = null;
   function showModalAlert(key, overrides={}){
     const cfg = { ...defaultConfig, ...(configs[key]||{}), ...overrides };
+    if(Object.prototype.hasOwnProperty.call(cfg, 'dismissable')){
+      cfg.dismissible = cfg.dismissable;
+      delete cfg.dismissable;
+    }
     if(!cfg.message) return;
     if(currentModalAlert){
       clearTimeout(modalAlertTimer);
@@ -249,7 +269,7 @@ const configs = {
     const rect = dialog.getBoundingClientRect();
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${cfg.type}` +
-      (cfg.dismissable ? ' alert-dismissible' : '') +
+      (cfg.dismissible ? ' alert-dismissible' : '') +
       (cfg.fade ? ' fade' : '');
     alertDiv.setAttribute('role','alert');
     alertDiv.setAttribute('data-bs-theme','dark');
@@ -259,7 +279,7 @@ const configs = {
     alertDiv.style.width=`${rect.width}px`;
     alertDiv.style.zIndex='1060';
     alertDiv.innerHTML = cfg.message;
-    if(cfg.dismissable){
+    if(cfg.dismissible){
       alertDiv.innerHTML += '<button type="button" class="btn-close btn-close-white" aria-label="Close"></button>';
     }
     document.body.append(alertDiv);
@@ -278,10 +298,10 @@ const configs = {
       currentModalAlert=null;
       clearTimeout(modalAlertTimer);
     }
-    if(cfg.dismissable){
+    if(cfg.dismissible){
       alertDiv.querySelector('.btn-close').addEventListener('click', dismiss);
     }
-    if(cfg.autoDismiss){
+    if(cfg.autoDismiss && cfg.timeout > 0){
       modalAlertTimer=setTimeout(dismiss,cfg.timeout);
     }
   }
