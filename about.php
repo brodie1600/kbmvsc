@@ -1,6 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
-
+require_once dirname(__DIR__) . '/config/bootstrap_env.php';
 $contactEmail = $_ENV['CONTACT_EMAIL'] ?? getenv('CONTACT_EMAIL') ?? '';
 ?>
 <!DOCTYPE html>
