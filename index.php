@@ -123,6 +123,14 @@ $voteAgg = [];
       <div class="modal-body">
         <!-- Google button -->
         <div id="g_id_signin"></div>
+        <div id="steam_signin">
+          <form action="steam_login.php" method="post">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+            <button type="submit" class="btn btn-steam">
+              <img src="https://community.fastly.steamstatic.com/public/images/signinthroughsteam/sits_01.png" alt="">
+            </button>
+          </form>
+          </div>
         <hr>
         <!-- Email form -->
         <form id="authForm" method="post" action="auth.php">
