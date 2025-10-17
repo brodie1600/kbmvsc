@@ -19,18 +19,16 @@ $scheme = (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']))
     : ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http');
 
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-$scriptDir  = '';
+$pathPrefix = '';
 
 if ($scriptName !== '') {
     $scriptDir = str_replace('\\', '/', dirname($scriptName));
-    if ($scriptDir === '.' || $scriptDir === '/') {
-        $scriptDir = '';
-    } else {
-        $scriptDir = '/' . ltrim($scriptDir, '/');
+    if ($scriptDir !== '.' && $scriptDir !== '/') {
+        $pathPrefix = '/' . ltrim($scriptDir, '/');
     }
 }
 
-$baseUrl = sprintf('%s://%s%s', $scheme, $host, $scriptDir === '' ? '/' : $scriptDir . '/');
+$callbackUrl = sprintf('%s://%s%s/steam_callback.php', $scheme, $host, $pathPrefix);
 
 if (($_POST['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
     $_SESSION['flash'] = ['alerts' => ['keys' => ['authInvalidCsrf'], 'mode' => 'modal']];
@@ -40,7 +38,7 @@ if (($_POST['csrf_token'] ?? '') !== ($_SESSION['csrf_token'] ?? '')) {
 
 $oid = new LightOpenID($host);
 $oid->identity  = 'https://steamcommunity.com/openid';
-$oid->returnUrl = $baseUrl . 'steam_callback.php';
+$oid->returnUrl = $callbackUrl;
 $oid->required  = ['steamid'];
 $oid->optional  = ['contact/email'];
 

@@ -19,21 +19,19 @@ $scheme = (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']))
     : ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http');
 
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-$scriptDir  = '';
+$pathPrefix = '';
 
 if ($scriptName !== '') {
     $scriptDir = str_replace('\\', '/', dirname($scriptName));
-    if ($scriptDir === '.' || $scriptDir === '/') {
-        $scriptDir = '';
-    } else {
-        $scriptDir = '/' . ltrim($scriptDir, '/');
+    if ($scriptDir !== '.' && $scriptDir !== '/') {
+        $pathPrefix = '/' . ltrim($scriptDir, '/');
     }
 }
 
-$baseUrl = sprintf('%s://%s%s', $scheme, $host, $scriptDir === '' ? '/' : $scriptDir . '/');
+$callbackUrl = sprintf('%s://%s%s/steam_callback.php', $scheme, $host, $pathPrefix);
 
 $oid = new LightOpenID($host);
-$oid->returnUrl = $baseUrl . 'steam_callback.php';
+$oid->returnUrl = $callbackUrl;
 
 if (! $oid->mode) {
     header('Location: index.php#authModal');
