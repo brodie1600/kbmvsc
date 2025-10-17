@@ -51,9 +51,16 @@ if ($oid->mode !== 'cancel' && $oid->validate()) {
     try {
         $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare('SELECT id FROM users WHERE steam_id = ? LIMIT 1');
+        $stmt = $pdo->prepare('SELECT id, email FROM users WHERE steam_id = ? LIMIT 1');
         $stmt->execute([$steamId]);
-        $userId = $stmt->fetchColumn();
+        $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
+        $userId = $existingUser ? (int) $existingUser['id'] : null;
+        $existingEmail = ($existingUser && array_key_exists('email', $existingUser))
+            ? trim((string) $existingUser['email'])
+            : null;
+        if ($existingEmail === '') {
+            $existingEmail = null;
+        }
 
         if (! $userId) {
             if ($pendingEmail !== '') {
@@ -74,14 +81,20 @@ if ($oid->mode !== 'cancel' && $oid->validate()) {
             }
 
             if ($pendingEmail !== '') {
+                if ($existingEmail !== null && strcasecmp($existingEmail, $pendingEmail) !== 0) {
+                    throw new RuntimeException('steam_already_registered');
+                }
+
                 $conflictCheck = $pdo->prepare('SELECT id FROM users WHERE email = ? AND id <> ? LIMIT 1');
                 $conflictCheck->execute([$pendingEmail, $userId]);
                 if ($conflictCheck->fetch()) {
                     throw new RuntimeException('steam_email_conflict');
                 }
 
-                $upd = $pdo->prepare('UPDATE users SET email = ? WHERE id = ?');
-                $upd->execute([$pendingEmail, $userId]);
+                if ($existingEmail === null) {
+                    $upd = $pdo->prepare('UPDATE users SET email = ? WHERE id = ?');
+                    $upd->execute([$pendingEmail, $userId]);
+                }
             }
         }
 
@@ -91,9 +104,12 @@ if ($oid->mode !== 'cancel' && $oid->validate()) {
             $pdo->rollBack();
         }
         unset($_SESSION['steam_email'], $_SESSION['steam_email_expected_user_id']);
+        $alertKey = $e->getMessage() === 'steam_already_registered'
+            ? 'steamAlreadyRegistered'
+            : 'steamEmailMismatch';
         $_SESSION['flash'] = [
             'alerts' => [
-                'keys'          => ['steamEmailMismatch'],
+                'keys'          => [$alertKey],
                 'mode'          => 'modal',
                 'openAuthModal' => true,
             ],

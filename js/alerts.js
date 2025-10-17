@@ -120,7 +120,13 @@ const configs = {
 
   // Steam email mismatch with account
   steamEmailMismatch: {
-    message: 'The provided email is already associated with a different account.',
+    message: 'The provided email address is already associated with a different Steam account.',
+    type: 'danger'
+  },
+
+  // Steam account already registered with another email
+  steamAlreadyRegistered: {
+    message: 'This Steam account is already registered with a different email address.',
     type: 'danger'
   },
 
