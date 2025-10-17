@@ -42,6 +42,7 @@ $oid = new LightOpenID($host);
 $oid->identity  = 'https://steamcommunity.com/openid';
 $oid->returnUrl = $baseUrl . 'steam_callback.php';
 $oid->required  = ['steamid'];
+$oid->optional  = ['contact/email'];
 
 header('Location: ' . $oid->authUrl());
 exit;

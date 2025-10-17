@@ -43,16 +43,35 @@ if (! $oid->mode) {
 if ($oid->mode !== 'cancel' && $oid->validate()) {
     $steamId = basename($oid->identity); // The final path segment is the 64-bit SteamID
 
+    $attributes = $oid->getAttributes();
+    $steamEmail = null;
+    if (isset($attributes['contact/email']) && is_string($attributes['contact/email'])) {
+        $maybeEmail = trim($attributes['contact/email']);
+        if ($maybeEmail !== '' && filter_var($maybeEmail, FILTER_VALIDATE_EMAIL)) {
+            $steamEmail = $maybeEmail;
+        }
+    }
+
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare('SELECT id FROM users WHERE steam_id = ? LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email FROM users WHERE steam_id = ? LIMIT 1');
     $stmt->execute([$steamId]);
-    $userId = $stmt->fetchColumn();
+    $existingUser = $stmt->fetch();
 
-    if (! $userId) {
-        $ins = $pdo->prepare('INSERT INTO users (steam_id, created_at) VALUES (?, NOW())');
-        $ins->execute([$steamId]);
+    if (! $existingUser) {
+        $ins = $pdo->prepare('INSERT INTO users (steam_id, email, created_at) VALUES (?, ?, NOW())');
+        $ins->execute([$steamId, $steamEmail]);
         $userId = $pdo->lastInsertId();
+    } else {
+        $userId = $existingUser['id'];
+        if ($steamEmail) {
+            $currentEmail = $existingUser['email'] ?? '';
+            $normalizedCurrent = is_string($currentEmail) ? trim($currentEmail) : '';
+            if ($normalizedCurrent === '' || strcasecmp($normalizedCurrent, $steamEmail) !== 0) {
+                $upd = $pdo->prepare('UPDATE users SET email = ? WHERE id = ?');
+                $upd->execute([$steamEmail, $userId]);
+            }
+        }
     }
 
     $pdo->commit();
