@@ -82,7 +82,7 @@ $voteAgg = [];
       <?php if ($userId): ?>
         <div class="d-flex align-items-center position-absolute end-0 pe-3">
           <?php
-            $u = $pdo->prepare("SELECT email FROM users WHERE id = ?");
+            $u = $pdo->prepare("SELECT COALESCE(NULLIF(email, ''), steam_id) AS display_name FROM users WHERE id = ?");
             $u->execute([$userId]);
             $me = $u->fetchColumn();
           ?>
