@@ -126,7 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ email })
       })
       .then(res => res.json())
-      .then(() => {
+      .then(data => {
+        if (data && data.success === false && data.error === 'steam_linked') {
+          Alerts.showModal('forgotSteamAccount');
+          return;
+        }
         Alerts.showModal('forgotSuccess');
       })
       .catch(() => {

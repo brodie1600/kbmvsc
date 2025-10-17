@@ -19,10 +19,17 @@ if (preg_match('/@gmail\.com$/i', $email)) {
 }
 
 try {
-    // 3) Lookup user_id by email
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+    // 3) Lookup user by email
+    $stmt = $pdo->prepare("SELECT id, steam_id FROM users WHERE email = ? LIMIT 1");
     $stmt->execute([$email]);
-    $userId = $stmt->fetchColumn();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user && !empty($user['steam_id'])) {
+        echo json_encode(['success' => false, 'error' => 'steam_linked']);
+        exit;
+    }
+
+    $userId = $user['id'] ?? null;
 
     if ($userId) {
         // 4) Rate limit: no more than 3 requests per hour
