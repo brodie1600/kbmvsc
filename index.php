@@ -124,9 +124,10 @@ $voteAgg = [];
         <!-- Google button -->
         <div id="g_id_signin"></div>
         <div id="steam_signin">
-          <form action="steam_login.php" method="post">
+          <form id="steamSignInForm" action="steam_login.php" method="post">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
-            <button type="submit" class="btn btn-steam">
+            <input type="hidden" name="steam_email" id="steamEmailField" value="">
+            <button type="button" id="steamSignInButton" class="btn btn-steam">
               <img src="https://community.fastly.steamstatic.com/public/images/signinthroughsteam/sits_01.png" alt="">
             </button>
           </form>
@@ -188,6 +189,29 @@ $voteAgg = [];
           </div>
         </form>
 
+      </div>
+    </div>
+</div>
+</div>
+
+<div class="modal fade" id="steamEmailModal" tabindex="-1" aria-labelledby="steamEmailModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content p-3 bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title" id="steamEmailModalLabel">Add Your Email</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Steam's Web API intentionally omits email addresses for privacy reasons. Please provide a valid email address to tie it to your KBM vs Controller account.</p>
+        <form id="steamEmailForm" novalidate>
+          <div class="mb-3">
+            <label for="steamEmailInput" class="form-label">Email address</label>
+            <input type="email" class="form-control bg-dark text-light" id="steamEmailInput" autocomplete="email" required>
+          </div>
+          <div class="d-flex justify-content-end">
+            <button type="submit" id="steamEmailContinue" class="btn btn-outline-light">Continue</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -266,8 +290,147 @@ function handleCredentialResponse(response) {
           }
         });
       }
+  }
+})();
+
+  // Helpers for showing/hiding Bootstrap modals when Bootstrap isn't available yet
+  function fallbackShowModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.add('show');
+    modalEl.style.display = 'block';
+    modalEl.removeAttribute('aria-hidden');
+    document.body.classList.add('modal-open');
+    if (!document.querySelector('.modal-backdrop')) {
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop fade show';
+      document.body.appendChild(backdrop);
     }
-  })();
+  }
+
+  function fallbackHideModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('show');
+    modalEl.style.display = 'none';
+    modalEl.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) {
+      backdrop.remove();
+    }
+  }
+
+  // Steam email collection modal handling
+  const steamSignInForm   = document.getElementById('steamSignInForm');
+  const steamSignInButton = document.getElementById('steamSignInButton');
+  const steamEmailField   = document.getElementById('steamEmailField');
+  const steamEmailModalEl = document.getElementById('steamEmailModal');
+  const steamEmailInput   = document.getElementById('steamEmailInput');
+  const steamEmailForm    = document.getElementById('steamEmailForm');
+
+  let steamEmailModalInstance = null;
+
+  const ensureSteamEmailModal = () => {
+    if (!steamEmailModalEl) return null;
+    if (steamEmailModalInstance) return steamEmailModalInstance;
+    if (window.bootstrap && window.bootstrap.Modal) {
+      steamEmailModalInstance = window.bootstrap.Modal.getOrCreateInstance(steamEmailModalEl);
+    }
+    return steamEmailModalInstance;
+  };
+
+  const showSteamEmailModal = () => {
+    if (!steamEmailModalEl) return;
+    const instance = ensureSteamEmailModal();
+    if (instance) {
+      instance.show();
+    } else {
+      fallbackShowModal(steamEmailModalEl);
+    }
+    if (steamEmailInput) {
+      setTimeout(() => steamEmailInput.focus(), 150);
+    }
+  };
+
+  const hideSteamEmailModal = () => {
+    if (!steamEmailModalEl) return;
+    const instance = ensureSteamEmailModal();
+    if (instance) {
+      instance.hide();
+    } else {
+      fallbackHideModal(steamEmailModalEl);
+    }
+  };
+
+  if (steamEmailModalEl) {
+    steamEmailModalEl.addEventListener('click', evt => {
+      if (evt.target === steamEmailModalEl) {
+        hideSteamEmailModal();
+      }
+    });
+    const closeBtn = steamEmailModalEl.querySelector('[data-bs-dismiss="modal"]');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', hideSteamEmailModal);
+    }
+    steamEmailModalEl.addEventListener('shown.bs.modal', () => {
+      if (steamEmailInput) {
+        steamEmailInput.focus();
+      }
+    });
+  }
+
+  if (steamSignInButton) {
+    steamSignInButton.addEventListener('click', event => {
+      event.preventDefault();
+      if (steamEmailInput) {
+        steamEmailInput.value = steamEmailInput.value.trim();
+      }
+      showSteamEmailModal();
+    });
+  }
+
+  if (steamEmailForm && steamSignInForm) {
+    steamEmailForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!steamEmailInput) return;
+      const email = steamEmailInput.value.trim();
+      const lower = email.toLowerCase();
+      const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      if (!validEmail) {
+        Alerts.showModal('authInvalidEmail');
+        return;
+      }
+      if (lower.endsWith('@gmail.com')) {
+        Alerts.showModal('loginGmailBlock');
+        return;
+      }
+
+      fetch('steam_email_validate.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, csrf_token: csrfToken })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data || typeof data.success === 'undefined') {
+          throw new Error('invalid_response');
+        }
+        if (!data.success) {
+          const key = data.alertKey || 'authInvalidEmail';
+          Alerts.showModal(key);
+          return;
+        }
+        if (steamEmailField) {
+          steamEmailField.value = email;
+        }
+        hideSteamEmailModal();
+        steamSignInForm.submit();
+      })
+      .catch(() => {
+        Alerts.showModal('steamEmailNetworkError');
+      });
+    });
+  }
 
   // AJAX helper
   async function postJSON(url, data) {

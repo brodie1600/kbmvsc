@@ -46,6 +46,12 @@ const configs = {
     type: 'danger'
   },
 
+  // Invalid CSRF during authentication
+  authInvalidCsrf: {
+    message: 'Invalid CSRF token. Please refresh the page and try again.',
+    type: 'danger'
+  },
+
   // When a user has an email address ending in @gmail.com entered in the form and clicks the "Reset Password" link
   forgotGmailAccount: {
     message: 'You cannot reset the password of a Gmail account using this form.',
@@ -62,6 +68,12 @@ const configs = {
   forgotNetworkError: {
     message: 'Network error. Please try again.',
     type: 'danger'
+  },
+
+  // When the email entered for password reset belongs to a Steam-linked account
+  forgotSteamAccount: {
+    message: 'This email address is linked to a Steam account, so there is no password to reset. Please sign in with Steam instead.',
+    type: 'warning'
   },
 
   // When a user successfully initiates a password reset
@@ -98,6 +110,36 @@ const configs = {
   googleSigninServerError: {
     message: 'A server error occurred. Please try again.',
     type: 'danger'
+  },
+
+  // Steam email validation network error
+  steamEmailNetworkError: {
+    message: 'Network error verifying your email. Please try again.',
+    type: 'danger'
+  },
+
+  // Steam sign-in failure
+  steamSigninFailed: {
+    message: 'Steam sign-in failed. Please try again.',
+    type: 'danger'
+  },
+
+  // Steam email mismatch with account
+  steamEmailMismatch: {
+    message: 'The provided email address is already associated with a different Steam account.',
+    type: 'danger'
+  },
+
+  // Steam account already registered with another email
+  steamAlreadyRegistered: {
+    message: 'This Steam account is already registered with a different email address.',
+    type: 'danger'
+  },
+
+  // Missing email for Steam flow
+  steamEmailRequired: {
+    message: 'Please provide a valid email address before continuing with Steam.',
+    type: 'warning'
   },
 
   // When a user has an email address ending in @gmail.com entered in the form and clicks the "Login" or "Register" buttons
