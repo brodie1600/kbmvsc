@@ -70,6 +70,12 @@ const configs = {
     type: 'danger'
   },
 
+  // When the email entered for password reset belongs to a Steam-linked account
+  forgotSteamAccount: {
+    message: 'This email address is linked to a Steam account, so there is no password to reset. Please sign in with Steam instead.',
+    type: 'warning'
+  },
+
   // When a user successfully initiates a password reset
   forgotSuccess: {
     message: 'If the email address is registered, please check your inbox for a link to reset your password.',
