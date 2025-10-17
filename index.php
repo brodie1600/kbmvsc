@@ -95,7 +95,7 @@ $voteAgg = [];
   </div>
 </nav>
 <div class="announce">
-  Click on a title to expand details and cast your vote. Votes are tied to your account, so you must be logged in first. Registration is easy and takes three clicks.
+  Click on a title to expand details and cast your vote. Votes are tied to your account, so you must be logged in first. Registration is easy and takes just a few clicks.
 </div>
   <div class="games-list"></div>
   <div class="text-center my-3">
@@ -202,7 +202,7 @@ $voteAgg = [];
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p>Steam's Web API intentionally omits email addresses for privacy reasons. Please provide a valid email address to tie it to your KBM vs Controller account.</p>
+        <p>Steam's Web API does not expose email addresses. Please provide a valid email address to link it to your <b>KBM vs Controller</b> account. This does not need to be the same email address you use for Steam.</p>
         <form id="steamEmailForm" novalidate>
           <div class="mb-3">
             <label for="steamEmailInput" class="form-label">Email address</label>
