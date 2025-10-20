@@ -1,11 +1,28 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 // Pull any flash data for errors and old inputs
-$flash     = $_SESSION['flash'] ?? [];
-$errors    = $flash['errors']     ?? [];
-$oldEmail  = $flash['email']      ?? '';
-$flashType = $flash['type']       ?? 'danger';
+$flash        = $_SESSION['flash'] ?? [];
+$oldEmail     = $flash['email']    ?? '';
+$alertDetails = $flash['alerts']   ?? null;
 unset($_SESSION['flash']);
+
+$serverAlertPayload = null;
+if ($alertDetails) {
+  $keys = array_values(array_filter(
+    $alertDetails['keys'] ?? [],
+    function ($k) {
+      return is_string($k) && $k !== '';
+    }
+  ));
+  $openAuthModal = !empty($alertDetails['openAuthModal']);
+  if ($keys || $openAuthModal) {
+    $serverAlertPayload = [
+      'keys'          => $keys,
+      'mode'          => $alertDetails['mode'] ?? 'modal',
+      'openAuthModal' => $openAuthModal,
+    ];
+  }
+}
 
 // 1. Determine current user
 $userId = $_SESSION['user_id'] ?? null;
@@ -34,6 +51,7 @@ $voteAgg = [];
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Not sure if you should play your game with a keyboard and mouse or a controller? Browse through a vast library of popular PC games to quickly determine and vote on which playstyle is best!">
   <title>KBM vs Controller</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
@@ -78,7 +96,7 @@ $voteAgg = [];
   </div>
 </nav>
 <div class="announce">
-  Click on a title to expand details and cast your vote. Votes are tied to your account, so you must be logged in first. Registration is easy and takes three clicks.
+  Click on a title to expand details and cast your vote. Votes are tied to your account, so you must be logged in first. Registration is easy and takes just a few clicks.
 </div>
   <div class="games-list"></div>
   <div class="text-center my-3">
@@ -90,6 +108,7 @@ $voteAgg = [];
     window.isLoggedIn = isLoggedIn;
     const csrfToken = '<?= $_SESSION['csrf_token'] ?>';
     window.csrfToken = csrfToken;
+    window.serverAlerts = <?= json_encode($serverAlertPayload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
   </script>
   <script src="js/alerts.js"></script>
   <script src="js/script.js"></script>
@@ -105,6 +124,15 @@ $voteAgg = [];
       <div class="modal-body">
         <!-- Google button -->
         <div id="g_id_signin"></div>
+        <div id="steam_signin">
+          <form id="steamSignInForm" action="steam_login.php" method="post">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+            <input type="hidden" name="steam_email" id="steamEmailField" value="">
+            <button type="button" id="steamSignInButton" class="btn btn-steam">
+              <img src="https://community.fastly.steamstatic.com/public/images/signinthroughsteam/sits_01.png" alt="">
+            </button>
+          </form>
+          </div>
         <hr>
         <!-- Email form -->
         <form id="authForm" method="post" action="auth.php">
@@ -145,18 +173,6 @@ $voteAgg = [];
               data-sitekey="<?= htmlspecialchars(RECAPTCHA_SITE_KEY) ?>"
             ></div>
           </div>
-
-
-          <!-- Error display -->
-            <?php if (!empty($errors)): ?>
-              <div class="alert alert-<?= htmlspecialchars($flashType) ?> fade show" role="alert" data-bs-theme="dark">
-                <span class="mb-0">
-                  <?php foreach ($errors as $err): ?>
-                    <?= htmlspecialchars($err) ?>
-                  <?php endforeach; ?>
-                </span>
-              </div>
-            <?php endif; ?>
             
           <div class="d-flex justify-content-between mt-3">
             <button
@@ -174,6 +190,29 @@ $voteAgg = [];
           </div>
         </form>
 
+      </div>
+    </div>
+</div>
+</div>
+
+<div class="modal fade" id="steamEmailModal" tabindex="-1" aria-labelledby="steamEmailModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content p-3 bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title" id="steamEmailModalLabel">Add Your Email</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Steam's Web API does not expose email addresses. Please provide a valid email address to link it to your <b>KBM vs Controller</b> account. This does not need to be the same email address you use for Steam.</p>
+        <form id="steamEmailForm" novalidate>
+          <div class="mb-3">
+            <label for="steamEmailInput" class="form-label">Email address</label>
+            <input type="email" class="form-control bg-dark text-light" id="steamEmailInput" autocomplete="email" required>
+          </div>
+          <div class="d-flex justify-content-end">
+            <button type="submit" id="steamEmailContinue" class="btn btn-outline-light">Continue</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -221,7 +260,8 @@ function handleCredentialResponse(response) {
       // reload so navbar updates and votes can work
       window.location.reload();
     } else {
-      Alerts.showModal('googleSigninError', { message: data.error || Alerts.config.googleSigninError.message });
+      const alertKey = data.alertKey || 'googleSigninError';
+      Alerts.showModal(alertKey);
     }
   })
   .catch(() => {
@@ -230,23 +270,168 @@ function handleCredentialResponse(response) {
 }
 </script>
 
-<?php if (!empty($errors)): ?>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // grab the modal element
-    var el = document.getElementById('authModal');
-    // initialize it
-    var myModal = new bootstrap.Modal(el);
-    // show it
-    myModal.show();
-  });
-</script>
-<?php endif; ?>
-<script>
-  const authModal = new bootstrap.Modal(document.getElementById('authModal'));
-  document.getElementById('loginBtn').onclick = () => authModal.show();
-  const loginBtn  = document.getElementById('loginBtn');
-  if (loginBtn) loginBtn.onclick = () => authModal.show();
+  (function () {
+    const modalEl = document.getElementById('authModal');
+    const loginBtn = document.getElementById('loginBtn');
+    if (modalEl && loginBtn) {
+      if (window.bootstrap && window.bootstrap.Modal) {
+        const authModal = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+        loginBtn.addEventListener('click', () => authModal.show());
+      } else {
+        loginBtn.addEventListener('click', () => {
+          modalEl.classList.add('show');
+          modalEl.style.display = 'block';
+          modalEl.removeAttribute('aria-hidden');
+          document.body.classList.add('modal-open');
+          if (!document.querySelector('.modal-backdrop')) {
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            document.body.appendChild(backdrop);
+          }
+        });
+      }
+  }
+})();
+
+  // Helpers for showing/hiding Bootstrap modals when Bootstrap isn't available yet
+  function fallbackShowModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.add('show');
+    modalEl.style.display = 'block';
+    modalEl.removeAttribute('aria-hidden');
+    document.body.classList.add('modal-open');
+    if (!document.querySelector('.modal-backdrop')) {
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop fade show';
+      document.body.appendChild(backdrop);
+    }
+  }
+
+  function fallbackHideModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('show');
+    modalEl.style.display = 'none';
+    modalEl.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) {
+      backdrop.remove();
+    }
+  }
+
+  // Steam email collection modal handling
+  const steamSignInForm   = document.getElementById('steamSignInForm');
+  const steamSignInButton = document.getElementById('steamSignInButton');
+  const steamEmailField   = document.getElementById('steamEmailField');
+  const steamEmailModalEl = document.getElementById('steamEmailModal');
+  const steamEmailInput   = document.getElementById('steamEmailInput');
+  const steamEmailForm    = document.getElementById('steamEmailForm');
+
+  let steamEmailModalInstance = null;
+
+  const ensureSteamEmailModal = () => {
+    if (!steamEmailModalEl) return null;
+    if (steamEmailModalInstance) return steamEmailModalInstance;
+    if (window.bootstrap && window.bootstrap.Modal) {
+      steamEmailModalInstance = window.bootstrap.Modal.getOrCreateInstance(steamEmailModalEl);
+    }
+    return steamEmailModalInstance;
+  };
+
+  const showSteamEmailModal = () => {
+    if (!steamEmailModalEl) return;
+    const instance = ensureSteamEmailModal();
+    if (instance) {
+      instance.show();
+    } else {
+      fallbackShowModal(steamEmailModalEl);
+    }
+    if (steamEmailInput) {
+      setTimeout(() => steamEmailInput.focus(), 150);
+    }
+  };
+
+  const hideSteamEmailModal = () => {
+    if (!steamEmailModalEl) return;
+    const instance = ensureSteamEmailModal();
+    if (instance) {
+      instance.hide();
+    } else {
+      fallbackHideModal(steamEmailModalEl);
+    }
+  };
+
+  if (steamEmailModalEl) {
+    steamEmailModalEl.addEventListener('click', evt => {
+      if (evt.target === steamEmailModalEl) {
+        hideSteamEmailModal();
+      }
+    });
+    const closeBtn = steamEmailModalEl.querySelector('[data-bs-dismiss="modal"]');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', hideSteamEmailModal);
+    }
+    steamEmailModalEl.addEventListener('shown.bs.modal', () => {
+      if (steamEmailInput) {
+        steamEmailInput.focus();
+      }
+    });
+  }
+
+  if (steamSignInButton) {
+    steamSignInButton.addEventListener('click', event => {
+      event.preventDefault();
+      if (steamEmailInput) {
+        steamEmailInput.value = steamEmailInput.value.trim();
+      }
+      showSteamEmailModal();
+    });
+  }
+
+  if (steamEmailForm && steamSignInForm) {
+    steamEmailForm.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!steamEmailInput) return;
+      const email = steamEmailInput.value.trim();
+      const lower = email.toLowerCase();
+      const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      if (!validEmail) {
+        Alerts.showModal('authInvalidEmail');
+        return;
+      }
+      if (lower.endsWith('@gmail.com')) {
+        Alerts.showModal('loginGmailBlock');
+        return;
+      }
+
+      fetch('steam_email_validate.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, csrf_token: csrfToken })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data || typeof data.success === 'undefined') {
+          throw new Error('invalid_response');
+        }
+        if (!data.success) {
+          const key = data.alertKey || 'authInvalidEmail';
+          Alerts.showModal(key);
+          return;
+        }
+        if (steamEmailField) {
+          steamEmailField.value = email;
+        }
+        hideSteamEmailModal();
+        steamSignInForm.submit();
+      })
+      .catch(() => {
+        Alerts.showModal('steamEmailNetworkError');
+      });
+    });
+  }
 
   // AJAX helper
   async function postJSON(url, data) {

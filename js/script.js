@@ -3,6 +3,96 @@
 // Ensure Alerts.js is loaded before this file
 
 document.addEventListener('DOMContentLoaded', () => {
+  const processServerAlerts = () => {
+    if (processServerAlerts.handled) return;
+    const payload = window.serverAlerts;
+    if (!payload) {
+      processServerAlerts.handled = true;
+      return;
+    }
+
+    const keys = Array.isArray(payload.keys) ? payload.keys : [];
+    const mode = payload.mode === 'inline' ? 'inline' : 'modal';
+    const openAuthModal = Boolean(payload.openAuthModal);
+    const modalEl = document.getElementById('authModal');
+
+    const showAlerts = () => {
+      if (!keys.length) return;
+      if (mode === 'modal') {
+        if (keys.length === 1) {
+          Alerts.showModal(keys[0]);
+        } else {
+          Alerts.showFromKeys(keys, { modal: true });
+        }
+      } else {
+        if (keys.length === 1) {
+          Alerts.show(keys[0]);
+        } else {
+          Alerts.showFromKeys(keys);
+        }
+      }
+    };
+
+    if (mode === 'modal' && openAuthModal && modalEl) {
+      if (window.bootstrap && window.bootstrap.Modal) {
+        const instance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+        if (keys.length) {
+          const handleShown = () => {
+            modalEl.removeEventListener('shown.bs.modal', handleShown);
+            showAlerts();
+          };
+          modalEl.addEventListener('shown.bs.modal', handleShown, { once: true });
+        }
+        instance.show();
+        processServerAlerts.handled = true;
+        return;
+      }
+
+      if (document.readyState === 'complete') {
+        modalEl.classListn.add('show');
+        modalEl.style.display = 'block';
+        modalEl.removeAttribute('aria-hidden');
+        document.body.classList.add('modal-open');
+        if (!document.querySelector('.modal-backdrop')) {
+          const backdrop = document.createElement('div');
+          backdrop.className = 'modal-backdrop fade show';
+          document.body.appendChild(backdrop);
+        }
+        showAlerts();
+        processServerAlerts.handled = true;
+        return;
+      }
+
+      // Bootstrap not yet loaded; retry once page assets have finished loading
+      window.addEventListener('load', () => {
+        if (processServerAlerts.handled) return;
+        processServerAlerts();
+        if (!processServerAlerts.handled) {
+          // Final fallback if Bootstrap is still unavailable
+          modalEl.classList.add('show');
+          modalEl.style.display = 'block';
+          modalEl.removeAttribute('aria-hidden');
+          document.body.classList.add('modal-open');
+          if (!document.querySelector('.modal-backdrop')) {
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            document.body.appendChild(backdrop);
+          }
+          showAlerts();
+          processServerAlerts.handled = true;
+        }
+      }, { once: true });
+      return;
+    }
+
+    showAlerts();
+    processServerAlerts.handled = true;
+  };
+
+  processServerAlerts();
+
+  window.addEventListener('load', processServerAlerts, { once: true });
+  
   // 1) Block Gmail addresses on manual login/register
   const authForm  = document.getElementById('authForm');
   const emailInput = document.getElementById('authEmail');
@@ -36,7 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ email })
       })
       .then(res => res.json())
-      .then(() => {
+      .then(data => {
+        if (data && data.success === false && data.error === 'steam_linked') {
+          Alerts.showModal('forgotSteamAccount');
+          return;
+        }
         Alerts.showModal('forgotSuccess');
       })
       .catch(() => {
@@ -86,7 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(data => {
           if (!data.success) {
-            Alerts.show('voteError', { message: data.error || Alerts.config.voteError.message });
+            const alertKey = data.alertKey || 'voteError';
+            Alerts.show(alertKey);
             return;
           }
           // --- success UI update ---

@@ -19,10 +19,17 @@ if (preg_match('/@gmail\.com$/i', $email)) {
 }
 
 try {
-    // 3) Lookup user_id by email
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+    // 3) Lookup user by email
+    $stmt = $pdo->prepare("SELECT id, steam_id FROM users WHERE email = ? LIMIT 1");
     $stmt->execute([$email]);
-    $userId = $stmt->fetchColumn();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user && !empty($user['steam_id'])) {
+        echo json_encode(['success' => false, 'error' => 'steam_linked']);
+        exit;
+    }
+
+    $userId = $user['id'] ?? null;
 
     if ($userId) {
         // 4) Rate limit: no more than 3 requests per hour
@@ -55,8 +62,8 @@ try {
         // 7) Send the reset email
         $resetUrl = "https://kbmvscontroller.com/reset_password.php?token={$token}";
         $subject  = 'KBM vs Controller - Password Reset';
-        $message  = "You (or someone using this address) requested a password reset.\r\n\r\n"
-                  . "Click to set a new password:\r\n"
+        $message  = "You (or someone using this address) requested a password reset at kbmvscontroller.com.\r\n\r\n"
+                  . "Click the link below to set a new password:\r\n"
                   . "{$resetUrl}\r\n\r\n"
                   . "This link will expire in 1 hour.\r\n\r\n"
                   . "If you did not request this, you may safely delete this email.\r\n";

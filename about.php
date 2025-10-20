@@ -1,16 +1,5 @@
 <?php
-$envPath = __DIR__ . '/.env';
-if (file_exists($envPath)) {
-    $vars = parse_ini_file($envPath, false, INI_SCANNER_RAW);
-    if (is_array($vars)) {
-        foreach ($vars as $k => $v) {
-            if (!array_key_exists($k, $_ENV)) {
-                $_ENV[$k] = $v;
-                putenv("$k=$v");
-            }
-        }
-    }
-}
+require_once dirname(__DIR__) . '/config/bootstrap_env.php';
 $contactEmail = $_ENV['CONTACT_EMAIL'] ?? getenv('CONTACT_EMAIL') ?? '';
 ?>
 <!DOCTYPE html>
