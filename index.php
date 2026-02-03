@@ -228,21 +228,10 @@ window.addEventListener('DOMContentLoaded', () => {
     ux_mode: 'popup'
   });
   if (window.google && google.accounts && google.accounts.id) {
-    google.accounts.id.initialize({
-      client_id: '<?= GOOGLE_CLIENT_ID ?>',
-      callback: handleCredentialResponse,
-      ux_mode: 'popup'
-    });
-
-// 2. Render the "Continue with Google" button
-  google.accounts.id.renderButton(
-    document.getElementById('g_id_signin'),
-    { theme: 'outline', size: 'large', text: 'continue_with' }
-  );
     // 2. Render the "Continue with Google" button
     google.accounts.id.renderButton(
       document.getElementById('g_id_signin'),
-      { theme: 'outline', size: 'large', text: 'continue_with' }
+      { theme: 'filled_black', size: 'large', text: 'continue_with' }
     );
   }
 });
