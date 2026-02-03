@@ -199,9 +199,16 @@ document.addEventListener('DOMContentLoaded', () => {
           block.querySelector('.tick').style.left            = pctK + '%';
 
           let iconSrc = 'icons/question.svg';
-          if (k > c)      iconSrc = 'icons/kbm-drkong.svg';
-          else if (c > k) iconSrc = 'icons/controller-lgtong.svg';
+          let borderColor = '#aaa';
+          if (k > c) {
+            iconSrc = 'icons/kbm-drkong.svg';
+            borderColor = '#ba6c06';
+          } else if (c > k) {
+            iconSrc = 'icons/controller-lgtong.svg';
+            borderColor = '#fcba03';
+          }
           block.querySelector('.majority-icon').src = iconSrc;
+          block.style.borderColor = borderColor;
         })
         .catch(err => {
           // suppress the thrown rate_limit error

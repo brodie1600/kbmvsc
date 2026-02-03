@@ -74,10 +74,13 @@ foreach ($games as $game) {
     $your    = $userVotes[$gid] ?? null;
 
     $majorIcon = 'icons/question.svg';
+    $borderColor = '#aaa';
     if ($counts['kbm'] > $counts['controller']) {
         $majorIcon = 'icons/kbm-drkong.svg';
+        $borderColor = '#ba6c06';
     } elseif ($counts['controller'] > $counts['kbm']) {
         $majorIcon = 'icons/controller-lgtong.svg';
+        $borderColor = '#fcba03';
     }
 
     if ($isSteam) {
@@ -94,7 +97,7 @@ foreach ($games as $game) {
     $kbmBar = $pct;
     $ctrlBar = 100 - $pct;
 
-    echo '<div class="game-block collapsed" data-game-id="'.$gid.'">';
+    echo '<div class="game-block collapsed" data-game-id="'.$gid.'" style="border-color:'.$borderColor.'">';
     echo '  <div class="header-row">';
     echo '    <img class="cover" loading="lazy" src="'.htmlspecialchars($capsuleLgURL).'" onerror="this.onerror=null;this.src=\''.htmlspecialchars($headerURL).'\'" alt="&nbsp;">';
     echo '    <h1 class="title"><b>'.htmlspecialchars($game['name']).'</b></h1>';
